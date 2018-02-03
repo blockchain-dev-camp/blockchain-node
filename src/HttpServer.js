@@ -1,16 +1,16 @@
 module.exports = () => {
-    this.init = (port) => {
-        let bodyParser = require('body-parser')
-        let app = require('express')()
-        app.use(bodyParser.json())
+    let bodyParser = require('body-parser')
+    let app = require('express')()
+    app.use(bodyParser.json())
 
+    this.init = (port) => {
         app.get('/', (req, res) => {
             res.send("home")
         })
         app.get('/info', (req, res) => {
             res.send("info")
         })
-        app.get('/blocks', (req,res) => {
+        app.get('/blocks', (req, res) => {
         })
         app.get('/blocks/:index', (req, res) => {
         })
@@ -23,8 +23,6 @@ module.exports = () => {
         app.post('/blocks/notify', (req, res) => {
         })
         app.get('/peers', (req, res) => {
-        })
-        app.post('/peers', (req, res) => {
         })
 
         app.listen(port, () => console.log(`Server started at port ${port}`))
