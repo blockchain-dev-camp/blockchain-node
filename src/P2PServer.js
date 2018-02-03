@@ -8,22 +8,21 @@ const isValidBlockStructure = BC.isValidBlockStructure
 const replaceChain = BC.replaceChain
 
 
-module.exports = function () {
+let init = function (port) {
     let webSocket = require("ws")
+    let server = new webSocket.Server({ port: port })
 
-    this.init = (port) => {
-        let server = new webSocket.Server({ port: port })
-        server.on("connection", (ws) => {
-
-        })
-        console.log("listening websocket p2p port on: " + p2pPort);
-
-    }
-
-    return this
+    server.on("connection", (ws) => {
+        initConnection(ws)
+    })
+    console.log("listening websocket p2p port on: " + port);
 }
 
+
 let sockets = []
+let getSockets = function () {
+    return sockets
+}
 
 function initConnection(ws) {
     sockets.push(ws);
@@ -112,4 +111,4 @@ let connectToPeers = function (newPeer) {
     });
 };
 
-module.exports = { connectToPeers, broadcastLatest, initP2PServer, getSockets };
+module.exports = { connectToPeers, broadcastLatest, init, getSockets };
