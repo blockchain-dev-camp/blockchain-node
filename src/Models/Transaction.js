@@ -1,24 +1,20 @@
-let Transaction = (id) => {
-    this.Id = id
-    this.TxIns = []
-    this.TxOuts = []
+class Transaction {
+    constructor(id) {
+        this.Id = id
+        this.TxIns = []
+        this.TxOuts = []
+    }
 
-    return this
+
+    TxIn(txOutId, txOutIndex, signature) {
+        this.TxOutId = txOutId
+        this.TxOutIndex = txOutIndex
+        this.Signature = signature
+    }
+
+    TxOut(address, amount) {
+        this.Address = address
+        this.Amount = amount
+    }
 }
-
-let TxIn = (txOutId, txOutIndex, signature) => {
-    this.TxOutId = txOutId
-    this.TxOutIndex = txOutIndex
-    this.Signature = signature
-
-    return this
-}
-
-let TxOut = (address, amount) => {
-    this.Address = address
-    this.Amount = amount
-
-    return this
-}
-
-module.exports = { Transaction, TxIn, TxOut }
+module.exports =  Transaction

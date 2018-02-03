@@ -1,7 +1,8 @@
 
 const BC = require('./Blockchain')
-const getBlockchain = BC.getBlockchain
-const generateNextBlock = BC.generateNextBlock
+//const getBlockchain = BC.getBlockchain
+//const generateNextBlock = BC.generateNextBlock
+let chain = new BC()
 
 const P2P = require('./P2PServer')
 const getSockets = P2P.getSockets
@@ -17,11 +18,16 @@ let init = function (port) {
     app.use(bodyParser.json())
 
     app.get('/blocks', function (req, res) {
-        res.send(getBlockchain());
+        res.send(chain.getBlockchain());
     });
 
     app.post('/mineBlock', function (req, res) {
-        const newBlock = generateNextBlock(req.body.data);
+        const newBlock = chain.generateNextBlock(req.body.data);
+        res.send(newBlock);
+    });
+    app.post('/addBlock', function (req, res) {
+        const newBlock = chain.generateNextBlock(req.body.data)
+        chain.addBlock(newBlock)
         res.send(newBlock);
     });
 
