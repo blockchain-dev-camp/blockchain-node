@@ -5,6 +5,7 @@ const Block = require('./Models/Block')
 
 class Blockchain {
     constructor() {
+        this.genesisBlock = new Block(0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', new Date(), [], 0, 0);
         this.blockchain = [this.genesisBlock];
     }
 
@@ -14,6 +15,7 @@ class Blockchain {
 
 
     getLatestBlock() {
+        return this.blockchain[this.blockchain.length - 1];
     }
 
     generateNextBlock(blockData) {
