@@ -1,28 +1,64 @@
 const Block = require('./Models/Block')
-const BC = require('./Blockchain')
 
+const BC = require('./Blockchain')
 const addBlockToChain = BC.addBlockToChain
 const getBlockchain = BC.getBlockchain
 const getLatestBlock = BC.getLatestBlock
 const isValidBlockStructure = BC.isValidBlockStructure
 const replaceChain = BC.replaceChain
 
+const P2PMessage = require('./Models/P2PMessage')
+const Message = P2PMessage.Message
+const MessageType = P2PMessage.MessageType
+
+
+let sockets = []
 
 let init = function (port) {
     let webSocket = require("ws")
     let server = new webSocket.Server({ port: port })
 
-    server.on("connection", (ws) => {
+    server.on("connection", function (ws) {
         initConnection(ws)
     })
     console.log("listening websocket p2p port on: " + port);
 }
 
-
-let sockets = []
 let getSockets = function () {
     return sockets
 }
+
+let write = function (ws, message) {
+    return ws.send(JSON.stringify(message));
+}
+
+let queryChainLengthMsg = function () {
+    let message = Message(MessageType.QUERY_LATEST, null)
+    return message
+}
+const queryAllMsg = function () {
+    let message = Message(MessageType.QUERY_ALL, null)
+    return message
+};
+
+let responseChainMsg = function () {
+    let message = Message(MessageType.RESPONSE_BLOCKCHAIN, JSON.stringify(getBlockchain()))
+    return message
+}
+
+let responseLatestMsg = function () {
+    let message = Message(MessageType.RESPONSE_BLOCKCHAIN, JSON.stringify([getLatestBlock()]))
+    return message
+};
+
+let broadcast = function (message) {
+    return sockets.forEach(socket => write(socket, message));
+}
+
+let broadcastLatest = function () {
+    broadcast(responseLatestMsg());
+};
+
 
 function initConnection(ws) {
     sockets.push(ws);
@@ -31,33 +67,41 @@ function initConnection(ws) {
     write(ws, queryChainLengthMsg());
 }
 
-let write = function (ws, message) {
-    return ws.send(JSON.stringify(message));
-}
+function initMessageHandler(ws) {
+    ws.on('message', function (data) {
+        let message = validateMessage(data)
+        if (message === null) {
+            console.log('Invalid recieved message: ' + data)
+            return
+        }
 
-let broadcast = function (message) {
-    return sockets.forEach((socket) => write(socket, message));
-}
+        console.log('Received message: ' + JSON.stringify(message));
+        switch (parseInt(message.type)) {
+            case MessageType.QUERY_LATEST:
+                write(ws, responseLatestMsg());
+                break;
 
-let queryChainLengthMsg = function () {
-    return { 'type': MessageType.QUERY_LATEST, 'data': null };
-}
-const queryAllMsg = function () {
-    return { 'type': MessageType.QUERY_ALL, 'data': null }
-};
+            case MessageType.QUERY_ALL:
+                write(ws, responseChainMsg());
+                break;
 
-let responseChainMsg = function () {
-    return { 'type': MessageType.RESPONSE_BLOCKCHAIN, 'data': JSON.stringify(getBlockchain()) };
+            case MessageType.RESPONSE_BLOCKCHAIN:
+                const receivedBlocks = validateMessageData(message.data);
+                if (receivedBlocks === null) {
+                    console.log('invalid blocks received:');
+                    console.log(message.data)
+                    break;
+                }
+                handleBlockchainResponse(receivedBlocks);
+                break;
+        }
+    });
 }
-
-let responseLatestMsg = function () {
-    return { 'type': MessageType.RESPONSE_BLOCKCHAIN, 'data': JSON.stringify([getLatestBlock()]) }
-};
 
 let initErrorHandler = function (ws) {
-    let closeConnection = function (myWs) {
-        console.log('connection failed to peer: ' + myWs.url);
-        sockets.splice(sockets.indexOf(myWs), 1);
+    let closeConnection = function (wsToClose) {
+        console.log('connection failed to peer: ' + wsToClose.url);
+        sockets.splice(sockets.indexOf(wsToClose), 1);
     };
     ws.on('close', () => closeConnection(ws));
     ws.on('error', () => closeConnection(ws));
@@ -97,9 +141,6 @@ let handleBlockchainResponse = function (receivedBlocks) {
     }
 };
 
-let broadcastLatest = function () {
-    broadcast(responseLatestMsg());
-};
 
 let connectToPeers = function (newPeer) {
     let ws = new WebSocket(newPeer);
@@ -112,3 +153,18 @@ let connectToPeers = function (newPeer) {
 };
 
 module.exports = { connectToPeers, broadcastLatest, init, getSockets };
+
+
+
+function validateMessage(msg) {
+    if (!isNaN(msg.type)) {
+        return Message(msg.type, msg.data)
+    }
+    else {
+        return null
+    }
+}
+
+function validateMessageData(data) {
+    // TODO
+}
