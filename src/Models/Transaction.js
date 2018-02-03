@@ -1,7 +1,7 @@
-let Transaction = (id, txIns, txOuts) => {
+let Transaction = (id) => {
     this.Id = id
-    this.TxIns = txIns
-    this.TxOuts = txOuts
+    this.TxIns = []
+    this.TxOuts = []
 
     return this
 }
