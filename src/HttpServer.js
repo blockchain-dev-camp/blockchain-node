@@ -1,5 +1,5 @@
 module.exports = () => {
-    this.init = (port = 3333) => {
+    this.init = (port) => {
         let bodyParser = require('body-parser')
         let app = require('express')()
         app.use(bodyParser.json())
