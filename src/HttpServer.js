@@ -5,35 +5,19 @@ let init = function (port) {
 
     app.use(bodyParser.json())
 
-    app.get('/', function (req, res) {
-        res.send("home");
+    app.get('/blocks', (req, res) => {
+        res.send(getBlockchain());
     });
-    app.get('/info', function (req, res) {
-        res.send("info")
-    })
-    app.get('/blocks', function (req, res) {
-        res.send("block")
-    })
-    app.get('/blocks', function (req, res) {
-        res.send("blocks");
+    app.post('/mineBlock', (req, res) => {
+        const newBlock = generateNextBlock(req.body.data);
+        res.send(newBlock);
     });
-    app.get('/blocks/:index', function (req, res) {
-        res.send("block");
+    app.get('/peers', (req, res) => {
+        res.send(getSockets().map(s => s._socket.remoteAddress + ':' + s._socket.remotePort));
     });
-    app.get('/balance/:address/confirmations/:confirmCount', function (req, res) {
-        res.send("balance");
-    });
-    app.post('/transactions/new', function (req, res) {
-        res.send("transaction");
-    });
-    app.get('/transactions/:tranHash/info', function (req, res) {
-        res.send("transaction info");
-    });
-    app.post('/blocks/notify', function (req, res) {
-        res.send("block notify");
-    });
-    app.get('/peers', function (req, res) {
-        res.send("peers");
+    app.post('/addPeer', (req, res) => {
+        connectToPeers(req.body.peer);
+        res.send();
     });
 
     app.listen(port, function () {
