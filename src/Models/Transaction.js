@@ -26,11 +26,9 @@ class Transaction {
         // SenderPubKey: hex_number
         this.senderPubKey = senderPubKey;
 
-        // SenderSignature: {object|type:,data:}[2]
-
+        // SenderSignature: {object|type:,data:}[2] //base64
 
           this.senderSignature = senderSignature;
-
 
         // DateReceived: timestamp
         this.dateReceived = new Date().getTime();
@@ -57,7 +55,7 @@ class Transaction {
         let signAsBuffer =(JSONB.parse(this.senderSignature))
         let signatureCheck = crypto.checkSign(message, signAsBuffer, this.senderPubKey)
         // console.log(signatureCheck)
-        if(!signatureCheck)throw new Error()
+        if(!signatureCheck)throw new Error("Signanture Fail")
     }
 
 

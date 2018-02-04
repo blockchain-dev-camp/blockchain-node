@@ -79,6 +79,17 @@ let init = function (port) {
             crypto.generateKeys()
         )
     });
+    app.post('/tansactionSign', function (req, res) {
+
+        let from =req.body.fromAddress
+        let to =req.body.toAddress
+        let value =req.body.value
+        let privateKey =req.body.privateKey
+        let tr = Transaction.GenerateSignedTransaction(from,to,value,privateKey)
+        res.send(
+            tr
+        )
+    })
     app.post('/trsgn', function (req, res) {
         let from ="20f4309c6ff9164a95071b3489962200140d356a"
         let to ="a369d21d62fa3f03845ace5c9beaba29820c0789"
