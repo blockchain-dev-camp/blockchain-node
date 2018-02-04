@@ -54,7 +54,8 @@ class Transaction {
         let message = [this.fromAddress, this.toAddress, this.value,this.dateOfSign]
         let signAsBuffer =(JSONB.parse(this.senderSignature))
         let signatureCheck = crypto.checkSign(message, signAsBuffer, this.senderPubKey)
-        // console.log(signatureCheck)
+        let addressFromPublic = crypto.publiKeyToAddres(this.senderPubKey)
+        if(addressFromPublic!==this.fromAddress)throw new Error("This is not your address")
         if(!signatureCheck)throw new Error("Signanture Fail")
     }
 
@@ -65,6 +66,8 @@ class Transaction {
         dataToSign.push(date)
         let signature = crypto.sign(dataToSign, privateKey)
         let publicKey = crypto.getPublicKey(privateKey).toString('hex')
+        let addressFromPublic = crypto.publiKeyToAddres(publicKey)
+        if(addressFromPublic!=fromAd)throw new Error("This is not your address")
         let signatureCheck = crypto.checkSign(dataToSign, signature, publicKey)
         let JSONSgnature = JSONB.stringify(new Buffer(signature))
         let signedTransaction = new Transaction(fromAd, toAd, ammount, publicKey, JSONSgnature, date)
