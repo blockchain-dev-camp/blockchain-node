@@ -7,6 +7,9 @@ const ec = new ecdsa.ec('secp256k1');
 
 const COINBASE_AMOUNT = 50;
 
+
+
+
 let getTransactionId = function (transaction) {
     let txInContent = transaction.TxIns
         .map(txIn => txIn.TxOutId + txIn.TxOutIndex)
