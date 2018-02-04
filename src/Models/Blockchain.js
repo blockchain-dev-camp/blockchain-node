@@ -1,5 +1,6 @@
 const broadcastLatest = require('../P2PServer').broadcastLatest
 const Block = require('./Block')
+const crypto = require('./Crypto')
 
 class Blockchain {
     constructor() {
@@ -23,9 +24,9 @@ class Blockchain {
         let data = blockData
         let difficulty = 4
         let transactions = []
-        let transactionHash = Block.calculateHash(transactions)
+        let transactionHash = crypto.calculateSHA256(transactions)
 
-        let wholeHashForMiner = Block.calculateHash(
+        let wholeHashForMiner = crypto.calculateSHA256(
             previousBlock.blockHash,
             nextIndex,
             data,
@@ -47,7 +48,7 @@ class Blockchain {
             nounce = Math.floor((Math.random() * 100000) + 1);
             nextTimestamp = new Date().getTime();
             nextBlockHash =
-                Block.calculateHash(
+                crypto.calculateSHA256(
                     wholeHashForMiner,
                     mineBy,
                     nextTimestamp,
