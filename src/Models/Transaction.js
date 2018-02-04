@@ -1,3 +1,10 @@
+const CryptoJS = require('crypto-js')
+const ecdsa = require('elliptic')
+const _ = require('lodash')
+const ec = new ecdsa.ec('secp256k1')
+
+const COINBASE_AMOUNT = 50;
+
 const Block = require('./Block')
 
 class Transaction {
@@ -29,22 +36,8 @@ class Transaction {
 
         // MinedInBlockIndex: number
         this.minedInBlockIndex = undefined;
-
-<<<<<<< HEAD
-let UnspentTxOut = (txOutId, txOutIndex, address, amount) => {
-    this.TxOutId = txOutId;
-    this.TxOutIndex = txOutIndex;
-    this.Address = address;
-    this.Amount = amount;
-
-    return this
-}
-
-module.exports = { Transaction, TxIn, TxOut, UnspentTxOut }
-=======
         // Paid: bool
         this.paid = false;
-
         // TransactionHash: hex_number
         this.transactionHash = Block.calculateHash(
             fromAddress,
@@ -62,4 +55,3 @@ module.exports = { Transaction, TxIn, TxOut, UnspentTxOut }
     }
 }
 module.exports =  Transaction
->>>>>>> c77eac3d3fbc15173fae5aaf944d311d08392714
