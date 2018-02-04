@@ -14,16 +14,6 @@ const MessageType = P2PMessage.MessageType
 
 let sockets = []
 
-let init = function (port) {
-    let webSocket = require("ws")
-    let server = new webSocket.Server({ port: port })
-
-    server.on("connection", function (ws) {
-        initConnection(ws)
-    })
-    console.log("listening websocket p2p port on: " + port);
-}
-
 let getSockets = function () {
     return sockets
 }
@@ -59,6 +49,16 @@ let broadcastLatest = function () {
     broadcast(responseLatestMsg());
 };
 
+
+let init = function (port) {
+    let webSocket = require("ws")
+    let server = new webSocket.Server({ port: port })
+
+    server.on("connection", function (ws) {
+        initConnection(ws)
+    })
+    console.log("listening websocket p2p port on: " + port);
+}
 
 function initConnection(ws) {
     sockets.push(ws);

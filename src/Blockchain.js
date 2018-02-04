@@ -4,16 +4,52 @@ const broadcastLatest = require('./P2PServer').broadcastLatest
 const Block = require('./Models/Block')
 
 
-let genesisBlock = Block(0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', 1465154705, [], 0, 0);
-let blockchain = [genesisBlock];
+let genesisBlock = Block(0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', 1465154705, [], 0, 0)
+
+let blockchain = [genesisBlock]
+
+let unspentTxOuts = []
 
 let getBlockchain = function () {
-    return blockchain;
+    return blockchain
 }
 
 let getLatestBlock = function () {
-    return blockchain[blockchain.length - 1];
+    return blockchain[blockchain.length - 1]
 }
+
+// in seconds
+const BLOCK_GENERATION_INTERVAL = 10;
+
+// in blocks
+const DIFFICULTY_ADJUSTMENT_INTERVAL = 10;
+
+let getDifficulty = function (aBlockchain/*Block[]*/) {
+    let latestBlock = aBlockchain[blockchain.length - 1];
+
+    if (latestBlock.Index % DIFFICULTY_ADJUSTMENT_INTERVAL === 0 && latestBlock.Index !== 0) {
+        return getAdjustedDifficulty(latestBlock, aBlockchain);
+    }
+    else {
+        return latestBlock.difficulty;
+    }
+};
+
+let getAdjustedDifficulty = function(latestBlock, aBlockchain/*Block[]*/) {
+    let prevAdjustmentBlock = aBlockchain[blockchain.length - DIFFICULTY_ADJUSTMENT_INTERVAL];
+    let timeExpected = BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL;
+    let timeTaken = latestBlock.timestamp - prevAdjustmentBlock.timestamp;
+
+    if (timeTaken < timeExpected / 2) {
+        return prevAdjustmentBlock.difficulty + 1;
+    }
+    else if (timeTaken > timeExpected * 2) {
+        return prevAdjustmentBlock.difficulty - 1;
+    }
+    else {
+        return prevAdjustmentBlock.difficulty;
+    }
+};
 
 let generateNextBlock = function (blockData) {
     let previousBlock = getLatestBlock();
@@ -24,13 +60,24 @@ let generateNextBlock = function (blockData) {
     return newBlock;
 };
 
+let findBlock = function (index, previousHash, timestamp, data, difficulty) {
+    let nonce = 0;
+    while (true) {
+        let hash = calculateHash(index, previousHash, timestamp, data, difficulty, nonce);
+
+        if (hashMatchesDifficulty(hash, difficulty)) {
+            return Block(index, hash, previousHash, timestamp, data, difficulty, nonce);
+        }
+        nonce += 1;
+    }
+};
+
 let calculateHashForBlock = function (block) {
-    return calculateHash(block.Index, block.PreviousHash, block.Timestamp, block.Data);
+    return calculateHash(block.Index, block.PreviousHash, block.Timestamp, block.Data).toString();
 }
 
-let calculateHash = function (index, previousHash, timestamp, data) {
-    // There is no proof of work yet
-    return cryptoJs.SHA256(index + previousHash + timestamp + data)
+let calculateHash = function (index, previousHash, timestamp, data, difficulty, nonce) {
+    return cryptoJs.SHA256(index + previousHash + timestamp + data + difficulty + nonce)
 }
 
 let addBlock = function (newBlock) {
@@ -90,6 +137,20 @@ let isValidChain = function (blockchainToValidate) {
     }
 
     return result
+};
+
+let isValidTimestamp = function (newBlock, previousBlock) {
+    return (previousBlock.Timestamp - 60 < newBlock.Timestamp) && newBlock.Timestamp - 60 < getCurrentTimestamp();
+};
+
+let getCurrentTimestamp = function () {
+    return Math.round(new Date().getTime() / 1000);
+}
+
+let hashMatchesDifficulty = function (hash, difficulty) {
+    let hashInBinary = hexToBinary(hash);
+    let requiredPrefix = '0'.repeat(difficulty);
+    return hashInBinary.startsWith(requiredPrefix);
 };
 
 let addBlockToChain = function (newBlock) {

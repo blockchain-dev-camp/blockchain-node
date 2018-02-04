@@ -21,4 +21,13 @@ let TxOut = (address, amount) => {
     return this
 }
 
-module.exports = { Transaction, TxIn, TxOut }
+let UnspentTxOut = (txOutId, txOutIndex, address, amount) => {
+    this.TxOutId = txOutId;
+    this.TxOutIndex = txOutIndex;
+    this.Address = address;
+    this.Amount = amount;
+
+    return this
+}
+
+module.exports = { Transaction, TxIn, TxOut, UnspentTxOut }
