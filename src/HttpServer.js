@@ -39,8 +39,16 @@ let init = function (port) {
     });
 
     app.post('/addPeer', function (req, res) {
-        connectToPeers(req.body.peer);
-        res.send();
+        var connection = connectToPeers(req.body.peer);
+        
+        if (connection == false) {
+            response = {
+                "error": "true",
+                "message": "Connection to this peer failed"
+            }
+
+            res.send(response);
+        }
     });
     app.get('/transactions', function (req, res) {
         res.send(
