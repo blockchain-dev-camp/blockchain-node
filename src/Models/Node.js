@@ -1,11 +1,20 @@
+
 class Node {
-    constructor(peers, blocks, pendingTransactions, balances, difficulty, miningJobs){
-        this.Peers = peers // URL[]
-        this.Blocks = blocks // Block[]
-        this.PendingTransactions = pendingTransactions // Transaction[]
-        this.Balances = balances // map(address => number)
+    constructor(blockChain, difficulty) {
+        this.Peers = [] // URL[]
+        this.blockChain = blockChain // blockChain
+        this.PendingTransactions = [] // Transaction[]
+        this.Balances = {} // map(address => number)
         this.Difficulty = difficulty // number
-        this.MiningJobs = miningJobs // map(address => Block)
+        this.MiningJobs = {} // map(address => Block)
+    }
+
+    addTransactions(tx) {
+        this.PendingTransactions.push(tx)
+    }
+
+    getTransactions() {
+        return this.PendingTransactions
     }
 }
 

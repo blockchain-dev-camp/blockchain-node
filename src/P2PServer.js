@@ -1,6 +1,6 @@
 const Block = require('./Models/Block')
 
-const BC = require('./Blockchain')
+const BC = require('./Models/Blockchain')
 const addBlockToChain = BC.addBlockToChain
 const getBlockchain = BC.getBlockchain
 const getLatestBlock = BC.getLatestBlock

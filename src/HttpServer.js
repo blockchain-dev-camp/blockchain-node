@@ -1,8 +1,11 @@
-
-const BC = require('./Blockchain')
+const Node = require('./Models/Node')
+const BC = require('./Models/Blockchain')
+const Block = require('./Models/Block')
+const Transaction = require('./Models/Transaction')
 //const getBlockchain = BC.getBlockchain
 //const generateNextBlock = BC.generateNextBlock
 let chain = new BC()
+let localNode = new Node([],chain,1)
 
 const P2P = require('./P2PServer')
 const getSockets = P2P.getSockets
@@ -38,6 +41,28 @@ let init = function (port) {
     app.post('/addPeer', function (req, res) {
         connectToPeers(req.body.peer);
         res.send();
+    });
+    app.get('/transactions', function (req, res) {
+        res.send(
+            localNode.getTransactions()
+        )
+    });
+    app.post('/transactions/new', function (req, res) {
+        let transaction = new Transaction(
+            req.body.fromAddress,
+            req.body.toAddress,
+            req.body.transactionValue,
+            req.body.senderPubKey,
+            req.body.senderSignature,
+            new Date().getTime())
+        if(transaction)
+        localNode.addTransactions(transaction)
+            res.send(
+                {
+                    "dateReceived": new Date(transaction.dateReceived),
+                    "transactionHash": transaction.transactionHash
+                }
+            )
     });
 
     app.listen(port, function () {

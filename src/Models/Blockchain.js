@@ -1,7 +1,5 @@
-const cryptoJs = require('crypto-js')
-
-const broadcastLatest = require('./P2PServer').broadcastLatest
-const Block = require('./Models/Block')
+const broadcastLatest = require('../P2PServer').broadcastLatest
+const Block = require('./Block')
 
 class Blockchain {
     constructor() {
@@ -19,22 +17,46 @@ class Blockchain {
     }
 
     generateNextBlock(blockData) {
-        let previousBlock = this.getLatestBlock();
-        let nextIndex = previousBlock.index + 1;
-        let nextTimestamp = new Date().getTime();
-        let nextHash = this.calculateHash(nextIndex, previousBlock.blockHash, nextTimestamp, blockData);
-        let newBlock = new Block(nextIndex, nextHash, previousBlock.blockHash, nextTimestamp, blockData);
-        //this.addBlockToChain(newBlock);
-        return newBlock;
-    };
+        //pool part for hash
+        let previousBlock = this.getLatestBlock()
+        let nextIndex = previousBlock.index + 1
+        let data = blockData
+        let difficulty = 4
+        let transactions = []
+        let transactionHash = Block.calculateHash(transactions)
 
-    calculateHashForBlock(block) {
-        return this.calculateHash(block.index, block.prevBlockHash, block.timestamp, block.data).toString();
+        let wholeHashForMiner = Block.calculateHash(
+            previousBlock.blockHash,
+            nextIndex,
+            data,
+            difficulty,
+            transactionHash);
+
+        //miner part of hash
+        let nextData = this.mine(wholeHashForMiner, difficulty)
+        let newBlock = new Block(nextIndex, nextData.nextBlockHash, previousBlock.blockHash, nextData.nextTimestamp, blockData, difficulty, nextData.nounce, transactions, nextData.mineBy);
+        return newBlock;
     }
 
-    calculateHash(index, previousHash, timestamp, data) {
-        // There is no proof of work yet
-        return cryptoJs.SHA256(index + previousHash + timestamp + data)
+    mine(wholeHashForMiner, difficulty) {
+        let mineBy = "pencho"
+        let nounceIsFind = false
+        //Start mining
+        let nounce, nextTimestamp, nextBlockHash
+        while (!nounceIsFind) {
+            nounce = Math.floor((Math.random() * 100000) + 1);
+            nextTimestamp = new Date().getTime();
+            nextBlockHash =
+                Block.calculateHash(
+                    wholeHashForMiner,
+                    mineBy,
+                    nextTimestamp,
+                    nounce);
+            if (nextBlockHash.substr(0, difficulty) === Array(difficulty + 1).join("0")) {
+                nounceIsFind = true
+            }
+        }
+        return {nextBlockHash,nounce,mineBy,nextTimestamp}
     }
 
     addBlock(newBlock) {
@@ -48,8 +70,9 @@ class Blockchain {
             && typeof block.blockHash === 'string'
             && typeof block.prevBlockHash === 'string'
             && typeof block.timestamp === 'number'
-            && typeof block.data === 'string';
-    };
+            // && typeof block.data === 'string';
+    }
+    ;
 
     isValidNewBlock(newBlock, previousBlock) {
         let result = true
@@ -66,13 +89,14 @@ class Blockchain {
             console.log('invalid previoushash');
             result = false
         }
-        else if (this.calculateHashForBlock(newBlock) !== newBlock.blockHash) {
+        else if ((newBlock.calculateHashForBlock()) !== newBlock.blockHash) {
             console.log('Invalid hash');
             result = false
         }
 
         return result
-    };
+    }
+    ;
 
     isValidChain(blockchainToValidate) {
         let isValidGenesis = function (block) {
@@ -94,7 +118,8 @@ class Blockchain {
         }
 
         return result
-    };
+    }
+    ;
 
     addBlockToChain(newBlock) {
         let result = false
@@ -104,7 +129,8 @@ class Blockchain {
         }
 
         return result
-    };
+    }
+    ;
 
     replaceChain(newBlocks) {
         if (isValidChain(newBlocks) && newBlocks.length > getBlockchain().length) {
@@ -115,7 +141,9 @@ class Blockchain {
         else {
             console.log('Received blockchain invalid');
         }
-    };
+    }
+    ;
 }
 
-module.exports = Blockchain
+module
+    .exports = Blockchain
