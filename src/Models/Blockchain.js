@@ -55,7 +55,7 @@ class Blockchain {
                 nounceIsFind = true
             }
         }
-        return {nextBlockHash,nounce,mineBy,nextTimestamp}
+        return { nextBlockHash, nounce, mineBy, nextTimestamp }
     }
 
     addBlock(newBlock) {
@@ -69,7 +69,7 @@ class Blockchain {
             && typeof block.blockHash === 'string'
             && typeof block.prevBlockHash === 'string'
             && typeof block.timestamp === 'number'
-            // && typeof block.data === 'string';
+        // && typeof block.data === 'string';
     }
     ;
 

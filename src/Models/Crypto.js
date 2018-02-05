@@ -2,7 +2,7 @@ const cryptoJs = require('crypto-js')
 const ecdsa = require('elliptic')
 const ec = new ecdsa.ec('secp256k1')
 const RPMD160 = require('ripemd160')
-const {randomBytes} = require('crypto')
+const { randomBytes } = require('crypto')
 const secp256k1 = require('secp256k1')
 
 class Crypto {
@@ -14,7 +14,7 @@ class Crypto {
 
     static converHexToUint(text) {
         let buffer = Buffer.from(text.toString(cryptoJs.enc.Hex), 'hex');
-        let array  = new Uint8Array(buffer);
+        let array = new Uint8Array(buffer);
         return array
 
         // let bytes = new Uint8Array(Math.ceil(text.length / 2));
@@ -37,7 +37,7 @@ class Crypto {
         return [pvHex, pbHex]
     }
 
-    static hashAndBuffer(obj){
+    static hashAndBuffer(obj) {
         let hash = this.calculateSHA256(obj);
         return this.converHexToUint(hash)
     }

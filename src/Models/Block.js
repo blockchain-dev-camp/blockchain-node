@@ -3,7 +3,7 @@ class Block {
     constructor(index, blockHash, previousHash, timestamp, difficulty, nounce, transactions, minedBy) {
         this.index = index
         this.transactions = transactions
-        this.transactionsHash = crypto.calculateSHA256(transactions)
+        this.transactionsHash = crypto.calculateSHA256(transactions)    
         this.difficulty = difficulty
         this.prevBlockHash = previousHash
         this.minedBy = minedBy

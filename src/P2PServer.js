@@ -1,3 +1,5 @@
+const WebSocket = require('ws');
+
 const Block = require('./Models/Block')
 
 const BC = require('./Models/Blockchain')
@@ -63,8 +65,8 @@ let init = function (port) {
 
 function initConnection(ws) {
     sockets.push(ws);
-    initMessageHandler(ws);
-    initErrorHandler(ws);
+    // initMessageHandler(ws);
+    // initErrorHandler(ws);
     write(ws, queryChainLengthMsg());
 }
 
@@ -145,14 +147,13 @@ let handleBlockchainResponse = function (receivedBlocks) {
 
 let connectToPeers = function (newPeer) {
     console.log("Add new peer");
-    return false;
-    // let ws = new WebSocket(newPeer);
-    // ws.on('open', () => {
-    //     initConnection(ws);
-    // });
-    // ws.on('error', () => {
-    //     return false;
-    // });
+    let ws = new WebSocket(newPeer);
+    ws.on('open', () => {
+        initConnection(ws);
+    });
+    ws.on('error', () => {
+        return false;
+    });
 };
 
 module.exports = { connectToPeers, broadcastLatest, init, getSockets };
