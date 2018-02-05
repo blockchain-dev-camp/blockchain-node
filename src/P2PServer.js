@@ -65,8 +65,8 @@ let init = function (port) {
 
 function initConnection(ws) {
     sockets.push(ws);
-    // initMessageHandler(ws);
-    // initErrorHandler(ws);
+    initMessageHandler(ws);
+    initErrorHandler(ws);
     write(ws, queryChainLengthMsg());
 }
 
@@ -89,12 +89,7 @@ function initMessageHandler(ws) {
                 break;
 
             case MessageType.RESPONSE_BLOCKCHAIN:
-                const receivedBlocks = validateMessageData(message.data);
-                if (receivedBlocks === null) {
-                    console.log('invalid blocks received:');
-                    console.log(message.data)
-                    break;
-                }
+                let receivedBlocks = validateMessageData(message.data);
                 handleBlockchainResponse(receivedBlocks);
                 break;
         }
@@ -165,8 +160,4 @@ function validateMessage(msg) {
     else {
         return null
     }
-}
-
-function validateMessageData(data) {
-    // TODO
 }
