@@ -72,12 +72,7 @@ function initConnection(ws) {
 
 function initMessageHandler(ws) {
     ws.on('message', function (data) {
-        let message = validateMessage(data)
-        if (message === null) {
-            console.log('Invalid recieved message: ' + data)
-            return
-        }
-
+        let message = JSON.parse(data);
         console.log('Received message: ' + JSON.stringify(message));
         switch (parseInt(message.type)) {
             case MessageType.QUERY_LATEST:
@@ -119,7 +114,9 @@ let handleBlockchainResponse = function (receivedBlocks) {
 
     let latestBlockHeld = getLatestBlock();
     if (latestBlockReceived.index > latestBlockHeld.index) {
+
         console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
+        
         if (latestBlockHeld.hash === latestBlockReceived.previousHash) {
             if (addBlockToChain(latestBlockReceived)) {
                 broadcast(responseLatestMsg());
@@ -152,12 +149,3 @@ let connectToPeers = function (newPeer) {
 };
 
 module.exports = { connectToPeers, broadcastLatest, init, getSockets };
-
-function validateMessage(msg) {
-    if (!isNaN(msg.type)) {
-        return Message(msg.type, msg.data)
-    }
-    else {
-        return null
-    }
-}

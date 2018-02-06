@@ -41,15 +41,17 @@ let init = function (port) {
     });
 
     app.post('/addPeer', function (req, res) {
-        var connection = connectToPeers(req.body.peer);
+        let connection = connectToPeers(req.body.peer);
 
         if (connection == false) {
             response = {
                 "error": "true",
                 "message": "Connection to this peer failed"
             }
-
             res.send(response);
+        }
+        else {
+            res.send();
         }
     });
     app.get('/transactions', function (req, res) {
@@ -81,21 +83,21 @@ let init = function (port) {
     });
     app.post('/tansactionSign', function (req, res) {
 
-        let from =req.body.fromAddress
-        let to =req.body.toAddress
-        let value =req.body.value
-        let privateKey =req.body.privateKey
-        let tr = Transaction.GenerateSignedTransaction(from,to,value,privateKey)
+        let from = req.body.fromAddress
+        let to = req.body.toAddress
+        let value = req.body.value
+        let privateKey = req.body.privateKey
+        let tr = Transaction.GenerateSignedTransaction(from, to, value, privateKey)
         res.send(
             tr
         )
     })
     app.post('/trsgn', function (req, res) {
-        let from ="20f4309c6ff9164a95071b3489962200140d356a"
-        let to ="a369d21d62fa3f03845ace5c9beaba29820c0789"
-        let value =324
+        let from = "20f4309c6ff9164a95071b3489962200140d356a"
+        let to = "a369d21d62fa3f03845ace5c9beaba29820c0789"
+        let value = 324
         let privateKey = "208b21e2ef3a51076029d4e5e34c1749447b82993adfcb5f077d9e7bf29ab7b8"
-        let tr = Transaction.GenerateSignedTransaction(from,to,value,privateKey)
+        let tr = Transaction.GenerateSignedTransaction(from, to, value, privateKey)
         res.send(
             tr
         )
@@ -105,4 +107,4 @@ let init = function (port) {
     });
 }
 
-module.exports = {init}
+module.exports = { init }
