@@ -21,7 +21,7 @@ class Transaction {
 
         // SenderSignature: hex_number
 
-          this.senderSignature = senderSignature;
+        this.senderSignature = senderSignature;
 
         // DateReceived: timestamp
         this.dateReceived = new Date().getTime();
@@ -49,7 +49,7 @@ class Transaction {
         let addressFromPublic = crypto.publiKeyToAddres(this.senderPubKey)
         if(addressFromPublic!==this.fromAddress)throw new Error("This is not your address")
         let signatureCheck = crypto.checkSign(message, signAsBuffer, this.senderPubKey)
-        if(!signatureCheck)throw new Error("Signanture Fail")
+        if(!signatureCheck)throw new Error("Signature Fail")
     }
 
 

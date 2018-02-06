@@ -7,7 +7,7 @@ const Crypto = require('./Models/Crypto')
 //const getBlockchain = BC.getBlockchain
 //const generateNextBlock = BC.generateNextBlock
 let chain = new BC()
-let localNode = new Node([], chain, 1)
+let localNode = new Node(chain, 3)
 
 const P2P = require('./P2PServer')
 const getSockets = P2P.getSockets
@@ -18,22 +18,71 @@ let init = function (port) {
 
     let bodyParser = require('body-parser')
     let app = require('express')()
-
-
     app.use(bodyParser.json())
 
+
     app.get('/blocks', function (req, res) {
-        res.send(chain.getBlockchain());
+        res.send(localNode.blockChain.getBlockchain());
+    });
+    app.get('/blocks/:index', (req, res) => {
+        let index = req.params.index;
+        res.send(localNode.blockChain.blockchain[index]);
     });
 
     app.post('/mineBlock', function (req, res) {
         const newBlock = chain.generateNextBlock(req.body.data);
-        chain.addBlock(newBlock)
+        localNode.blockChain.addBlock(newBlock)
         res.send(newBlock);
     });
+    app.get('/mineBlock/:address', function (req, res) {
+        let address = req.params.address;
+        let index = localNode.blockChain.blockchain.length
+        let transactionsIncluded = localNode.getTransactions().length + 1
+        let expectedReward = localNode.calculateAward()
+        let difficulty = localNode.Difficulty
+        let blockDataHash = localNode.getMiningJob(index, expectedReward, address, difficulty)
+        let out = {
+            index: index,
+            transactionsIncluded: transactionsIncluded,
+            expectedReward: expectedReward,
+            difficulty: difficulty,
+            blockDataHash: blockDataHash
+        }
+
+        //Answer for easy testing
+
+        let minerData = localNode.blockChain.mine(blockDataHash, difficulty)
+        let mineAnswer = {
+            nounce: minerData.nounce,
+            dateCreated: minerData.nextTimestamp,
+            blockHash: minerData.nextBlockHash
+        }
+        res.send([out, mineAnswer]);
+    });
+
+    app.post('/mining/submit-block/:address', (req, res) => {
+        let address = req.params.address;
+        let nounce = req.body.nounce;
+        let dateCreated = req.body.dateCreated
+        let blockHash = req.body.blockHash
+        let result = localNode.checkMiningJob(address, nounce, dateCreated, blockHash)
+        if (result) {
+            let previousHash = localNode.blockChain.getLatestBlock().blockHash;
+            let out = {
+                nonce: nounce,
+                dateCreated: new Date(dateCreated),
+                blockHash: blockHash
+            }
+            let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
+            localNode.blockChain.addBlock(block)
+            res.send(out)
+        }
+    })
+
+
     app.post('/addBlock', function (req, res) {
         const newBlock = chain.generateNextBlock(req.body.data)
-        chain.addBlock(newBlock)
+        localNode.blockChain.addBlock(newBlock)
         res.send(newBlock);
     });
 
@@ -108,4 +157,4 @@ let init = function (port) {
     });
 }
 
-module.exports = { init }
+module.exports = {init}

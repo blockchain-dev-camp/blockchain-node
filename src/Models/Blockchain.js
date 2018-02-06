@@ -4,7 +4,7 @@ const crypto = require('./Crypto')
 
 class Blockchain {
     constructor() {
-        this.genesisBlock = new Block(0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', new Date(), [], 0, 0);
+        this.genesisBlock = new Block(0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', new Date().getTime(), 0, 0,[], "0x0");
         this.blockchain = [this.genesisBlock];
     }
     getBlockchain() {
@@ -32,8 +32,8 @@ class Blockchain {
             mineBy);
 
         //miner part of hash
-        let nextData = this.mine(hashForMiner, difficulty)
-        let newBlock = new Block(nextIndex, nextData.nextBlockHash, previousBlock.blockHash, nextData.nextTimestamp, difficulty, nextData.nounce, transactions, mineBy);
+        let minerData = this.mine(hashForMiner, difficulty)
+        let newBlock = new Block(nextIndex, minerData.nextBlockHash, previousBlock.blockHash, minerData.nextTimestamp, difficulty, minerData.nounce, transactions, mineBy);
         return newBlock;
     }
 
@@ -42,7 +42,7 @@ class Blockchain {
         //Start mining
         let nounce, nextTimestamp, nextBlockHash
         while (!nounceIsFind) {
-            nounce = Math.floor((Math.random() * 100000) + 1);
+            nounce = Math.floor((Math.random() * 1000000) + 1);
             nextTimestamp = new Date().getTime();
             nextBlockHash =
                 crypto.calculateSHA256(
