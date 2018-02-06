@@ -1,12 +1,5 @@
 const crypto = require('./Crypto')
-var JSONB = require('json-buffer')
-var Buffer = require('buffer').Buffer
 
-// var str = JSONB.stringify(new Buffer('hello there!'))
-//
-// console.log(JSONB.parse(str)) //GET a BUFFER back
-
-// console.log(new RIPEMD160().update('42').digest('hex'))
 class Transaction {
     constructor(fromAddress,
                 toAddress,
@@ -26,7 +19,7 @@ class Transaction {
         // SenderPubKey: hex_number
         this.senderPubKey = senderPubKey;
 
-        // SenderSignature: {object|type:,data:}[2] //base64
+        // SenderSignature: hex_number
 
           this.senderSignature = senderSignature;
 
@@ -52,25 +45,23 @@ class Transaction {
             this.dateReceived
         )
         let message = [this.fromAddress, this.toAddress, this.value,this.dateOfSign]
-        let signAsBuffer =(JSONB.parse(this.senderSignature))
-        let signatureCheck = crypto.checkSign(message, signAsBuffer, this.senderPubKey)
+        let signAsBuffer =(crypto.converHexToUint(this.senderSignature))
         let addressFromPublic = crypto.publiKeyToAddres(this.senderPubKey)
         if(addressFromPublic!==this.fromAddress)throw new Error("This is not your address")
+        let signatureCheck = crypto.checkSign(message, signAsBuffer, this.senderPubKey)
         if(!signatureCheck)throw new Error("Signanture Fail")
     }
 
 
-    static GenerateSignedTransaction(fromAd, toAd, ammount, privateKey) {
-        let dataToSign = [fromAd, toAd, ammount]
+    static signTransaction(fromAd, toAd, ammount, privateKey) {
         let date = new Date().getTime()
-        dataToSign.push(date)
+        let dataToSign = [fromAd, toAd, ammount,date]
         let signature = crypto.sign(dataToSign, privateKey)
         let publicKey = crypto.getPublicKey(privateKey).toString('hex')
         let addressFromPublic = crypto.publiKeyToAddres(publicKey)
-        if(addressFromPublic!=fromAd)throw new Error("This is not your address")
-        let signatureCheck = crypto.checkSign(dataToSign, signature, publicKey)
-        let JSONSgnature = JSONB.stringify(new Buffer(signature))
-        let signedTransaction = new Transaction(fromAd, toAd, ammount, publicKey, JSONSgnature, date)
+        if(addressFromPublic!==fromAd)throw new Error("This is not your address")
+        let hexSignature = crypto.convertUIntToHex(signature)
+        let signedTransaction = new Transaction(fromAd, toAd, ammount, publicKey, hexSignature, date)
         return signedTransaction
     };
 

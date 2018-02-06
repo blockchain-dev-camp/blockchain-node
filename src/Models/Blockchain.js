@@ -19,26 +19,25 @@ class Blockchain {
         //pool part for hash
         let previousBlock = this.getLatestBlock()
         let nextIndex = previousBlock.index + 1
-        let data = blockData
-        let difficulty = 4
+        let difficulty = 3
         let transactions = []
         let transactionHash = crypto.calculateSHA256(transactions)
+        let mineBy = "pencho"
 
-        let wholeHashForMiner = crypto.calculateSHA256(
+        let hashForMiner = crypto.calculateSHA256(
             previousBlock.blockHash,
             nextIndex,
-            data,
             difficulty,
-            transactionHash);
+            transactionHash,
+            mineBy);
 
         //miner part of hash
-        let nextData = this.mine(wholeHashForMiner, difficulty)
-        let newBlock = new Block(nextIndex, nextData.nextBlockHash, previousBlock.blockHash, nextData.nextTimestamp, blockData, difficulty, nextData.nounce, transactions, nextData.mineBy);
+        let nextData = this.mine(hashForMiner, difficulty)
+        let newBlock = new Block(nextIndex, nextData.nextBlockHash, previousBlock.blockHash, nextData.nextTimestamp, difficulty, nextData.nounce, transactions, mineBy);
         return newBlock;
     }
 
-    mine(wholeHashForMiner, difficulty) {
-        let mineBy = "pencho"
+    mine(hashForMiner, difficulty) {
         let nounceIsFind = false
         //Start mining
         let nounce, nextTimestamp, nextBlockHash
@@ -47,15 +46,14 @@ class Blockchain {
             nextTimestamp = new Date().getTime();
             nextBlockHash =
                 crypto.calculateSHA256(
-                    wholeHashForMiner,
-                    mineBy,
+                    hashForMiner,
                     nextTimestamp,
                     nounce);
             if (nextBlockHash.substr(0, difficulty) === Array(difficulty + 1).join("0")) {
                 nounceIsFind = true
             }
         }
-        return { nextBlockHash, nounce, mineBy, nextTimestamp }
+        return { nextBlockHash, nounce, nextTimestamp }
     }
 
     addBlock(newBlock) {

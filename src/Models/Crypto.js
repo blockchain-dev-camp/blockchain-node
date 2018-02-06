@@ -2,7 +2,7 @@ const cryptoJs = require('crypto-js')
 const ecdsa = require('elliptic')
 const ec = new ecdsa.ec('secp256k1')
 const RPMD160 = require('ripemd160')
-const { randomBytes } = require('crypto')
+const {randomBytes} = require('crypto')
 const secp256k1 = require('secp256k1')
 
 class Crypto {
@@ -23,7 +23,8 @@ class Crypto {
     }
 
     static calculateSHA256(...arg) {
-        return cryptoJs.SHA256(arg.join("")).toString()
+        let stringToBeHashed = (arg.join(""))
+        return cryptoJs.SHA256(stringToBeHashed).toString()
     }
 
     static generateKeys() {
@@ -67,6 +68,9 @@ class Crypto {
         return addres
     }
 
+    static publicKeyVerify(publicKey) {
+        return secp256k1.publicKeyVerify(publicKey)
+    }
 }
 
 module.exports = Crypto

@@ -17,13 +17,13 @@ class Block {
         let hashForMiner = crypto.calculateSHA256(
             this.prevBlockHash,
             this.index,
-            this.data,
             this.difficulty,
-            this.transactionsHash)
+            this.transactionsHash,
+            this.minedBy
+    )
 
         let wholeHash = crypto.calculateSHA256(
             hashForMiner,
-            this.minedBy,
             this.timestamp,
             this.nounce)
         return wholeHash
