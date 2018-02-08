@@ -22,11 +22,11 @@ let init = function (port) {
 
 
     app.get('/blocks', function (req, res) {
-        res.send(localNode.blockChain.getBlockchain());
+        res.send([localNode.blockChain.getBlockchain(),localNode.Balances]);
     });
     app.get('/blocks/:index', (req, res) => {
         let index = req.params.index;
-        res.send(localNode.blockChain.blockchain[index]);
+        res.send(localNode.blockChain.blocks[index]);
     });
 
     app.post('/mineBlock', function (req, res) {
@@ -36,9 +36,9 @@ let init = function (port) {
     });
     app.get('/mineBlock/:address', function (req, res) {
         let address = req.params.address;
-        let index = localNode.blockChain.blockchain.length
+        let index = localNode.blockChain.blocks.length
         let transactionsIncluded = localNode.getTransactions().length + 1
-        let expectedReward = localNode.calculateAward()
+        let expectedReward = localNode.calculateReward()
         let difficulty = localNode.Difficulty
         let blockDataHash = localNode.getMiningJob(index, expectedReward, address, difficulty)
         let out = {
@@ -75,7 +75,8 @@ let init = function (port) {
             }
             let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
             localNode.blockChain.addBlock(block)
-            res.send(out)
+            localNode.balanceUpdate()
+            res.send([out,localNode.Balances])
         }
     })
 
@@ -137,7 +138,7 @@ let init = function (port) {
         let to = req.body.toAddress
         let value = req.body.value
         let privateKey = req.body.privateKey
-        let tr = Transaction.signTransaction(from, to, value, privateKey)
+        let tr = Transaction.signTransaction(from, to, value, privateKey,localNode.feePercent)
         res.send(
             tr
         )

@@ -6,7 +6,9 @@ class Transaction {
                 transactionValue,
                 senderPubKey,
                 senderSignature,
-                dateOfSign) {
+                dateOfSign,
+                feePercent
+                ) {
         // From: address
         this.fromAddress = fromAddress;
 
@@ -14,7 +16,7 @@ class Transaction {
         this.toAddress = toAddress;
 
         // Value: number
-        this.value = transactionValue;
+        this.value = transactionValue-transactionValue*feePercent;
 
         // SenderPubKey: hex_number
         this.senderPubKey = senderPubKey;
@@ -42,8 +44,11 @@ class Transaction {
             this.value,
             this.senderPubKey,
             this.senderSignature,
-            this.dateReceived
+            this.dateReceived,
+            this.fee
         )
+        //number
+        this.fee = transactionValue*feePercent
         let message = [this.fromAddress, this.toAddress, this.value,this.dateOfSign]
         let signAsBuffer =(crypto.converHexToUint(this.senderSignature))
         let addressFromPublic = crypto.publiKeyToAddres(this.senderPubKey)
@@ -53,15 +58,16 @@ class Transaction {
     }
 
 
-    static signTransaction(fromAd, toAd, ammount, privateKey) {
-        let date = new Date().getTime()
-        let dataToSign = [fromAd, toAd, ammount,date]
-        let signature = crypto.sign(dataToSign, privateKey)
+    static signTransaction(fromAd, toAd, ammount, privateKey,fee) {
         let publicKey = crypto.getPublicKey(privateKey).toString('hex')
         let addressFromPublic = crypto.publiKeyToAddres(publicKey)
         if(addressFromPublic!==fromAd)throw new Error("This is not your address")
+        let date = new Date().getTime()
+        let dataToSign = [fromAd, toAd, ammount,date]
+        let signature = crypto.sign(dataToSign, privateKey)
+        let kkk = crypto.checkSign(dataToSign,signature,publicKey)
         let hexSignature = crypto.convertUIntToHex(signature)
-        let signedTransaction = new Transaction(fromAd, toAd, ammount, publicKey, hexSignature, date)
+        let signedTransaction = new Transaction(fromAd, toAd, ammount, publicKey, hexSignature, date,fee)
         return signedTransaction
     };
 

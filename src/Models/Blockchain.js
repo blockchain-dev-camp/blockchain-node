@@ -5,14 +5,14 @@ const crypto = require('./Crypto')
 class Blockchain {
     constructor() {
         this.genesisBlock = new Block(0, '91a73664bc84c0baa1fc75ea6e4aa6d1d20c5df664c724e3159aefc2e1186627', '', new Date().getTime(), 0, 0,[], "0x0");
-        this.blockchain = [this.genesisBlock];
+        this.blocks = [this.genesisBlock];
     }
     getBlockchain() {
-        return this.blockchain;
+        return this.blocks;
     }
 
     getLatestBlock() {
-        return this.blockchain[this.blockchain.length - 1];
+        return this.blocks[this.blocks.length - 1];
     }
 
     generateNextBlock(blockData) {
@@ -58,7 +58,7 @@ class Blockchain {
 
     addBlock(newBlock) {
         if (this.isValidNewBlock(newBlock, this.getLatestBlock())) {
-            this.blockchain.push(newBlock);
+            this.blocks.push(newBlock);
         }
     }
 
@@ -121,7 +121,7 @@ class Blockchain {
     addBlockToChain(newBlock) {
         let result = false
         if (this.isValidNewBlock(newBlock, this.getLatestBlock())) {
-            this.blockchain.push(newBlock);
+            this.blocks.push(newBlock);
             result = true
         }
 
@@ -132,7 +132,7 @@ class Blockchain {
     replaceChain(newBlocks) {
         if (isValidChain(newBlocks) && newBlocks.length > getBlockchain().length) {
             console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
-            this.blockchain = newBlocks;
+            this.blocks = newBlocks;
             broadcastLatest();
         }
         else {
