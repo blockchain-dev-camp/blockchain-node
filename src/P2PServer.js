@@ -60,7 +60,7 @@ let init = function (port) {
         initConnection(ws)
     })
 
-    console.log("listening websocket p2p port on: " + port);
+    console.log("P2P server started at port: " + port);
 }
 
 function initConnection(ws) {
@@ -138,7 +138,6 @@ let handleBlockchainResponse = function (receivedBlocks) {
 
 
 let connectToPeers = function (newPeer) {
-    console.log("Add new peer");
     let ws = new WebSocket(newPeer);
     ws.on('open', () => {
         initConnection(ws);

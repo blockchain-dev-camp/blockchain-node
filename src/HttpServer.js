@@ -159,7 +159,7 @@ let init = function (port) {
         )
     });
     app.listen(port, function () {
-        console.log(`Server started at port ${port}`)
+        console.log(`Http server started at port ${port}`)
     });
 }
 
