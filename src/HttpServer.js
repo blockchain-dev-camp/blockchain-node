@@ -137,7 +137,7 @@ let init = function (port) {
             Crypto.generateKeys()
         )
     });
-    app.post('/tansactionSign', function (req, res) {
+    app.post('/transactions/sign', function (req, res) {
 
         let from = req.body.fromAddress
         let to = req.body.toAddress
