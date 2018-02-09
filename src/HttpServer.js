@@ -22,11 +22,16 @@ let init = function (port) {
 
 
     app.get('/blocks', function (req, res) {
-        res.send([localNode.blockChain.getBlockchain(),localNode.Balances]);
+        res.send(localNode.blockChain.getBlockchain());
     });
+
     app.get('/blocks/:index', (req, res) => {
         let index = req.params.index;
         res.send(localNode.blockChain.blocks[index]);
+    });
+
+    app.get('/balances', function (req, res) {
+        res.send(localNode.Balances);
     });
 
     app.post('/mineBlock', function (req, res) {
