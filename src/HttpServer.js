@@ -133,6 +133,25 @@ let init = function (port) {
             }
         )
     });
+    app.get('/transaction/:transactionId/info', (req, res) => {
+        let transactionId = req.params.transactionId;
+        let transactions = localNode.getTransactions()
+        let transaction = transactions.find(function(t){
+            return t.transactionId === transactionId
+        })
+        res.send(
+            {
+                "transaction": transaction,
+            }
+        )
+    });
+    app.get('/info', (req, res) => {
+        res.send(
+            {
+                "name": 'blockchain node'
+            }
+        )
+    });
 
     app.listen(port, function () {
         console.log(`Http server started at port ${port}`)
