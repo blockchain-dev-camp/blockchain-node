@@ -40,14 +40,14 @@ class Crypto {
 
     static hashAndBuffer(obj) {
         let hash = this.calculateSHA256(obj);
-        return this.converHexToUint(hash)
+        return Buffer.from(hash, 'hex')
     }
 
     static sign(message, privateKey) {
-        let sign = secp256k1.sign(this.hashAndBuffer(message), this.converHexToUint(privateKey))
+        console.log(secp256k1.sign)
+        let sign = secp256k1.sign(this.hashAndBuffer(message), Buffer.from(privateKey, "hex"))
         let signDER = secp256k1.signatureExport(sign.signature)
         return signDER
-
     }
 
     static checkSign(message, signature, publicKey) {
@@ -61,7 +61,7 @@ class Crypto {
     }
 
     static getPublicKey(privateKey) {
-        let publicKey = secp256k1.publicKeyCreate(this.converHexToUint(privateKey), true)
+        let publicKey = secp256k1.publicKeyCreate(privateKey, false)
         return publicKey
     }
 

@@ -16,8 +16,8 @@ class Node {
         this.address = crypto.publiKeyToAddres(this.publicKey)
         this.feePercent = 0.01 //1%
         this.blockGodReward = 20
-        this.godPvKey = 'd959e344b2b7fff9203f014b45e8d0bf3ff3625eb48b30e60d9c86560ec4c9d7'
-        this.godPbKey = '03f6decc12e6c1ce70b74fa71f1b897210a31163df2914e6a39f89cbc923d18f61'
+        this.godPvKey = '57da87852534fc39cec621550a0b701e18132b92f924172ace529490ebdafb04'
+        this.godPbKey = '04c5c2a12455a2712b2d0d42d0ad13f47764a19fcae3975974111d38428c2bd6f3864a1424d6fba5b05868d2b4f89931a4aac53b714efe4ce00f5dc830089c2d72'
         this.godAddress = crypto.publiKeyToAddres(this.godPbKey)
         this.Balances = {} // map(address => number)
         this.Balances[this.godAddress]=1000000000

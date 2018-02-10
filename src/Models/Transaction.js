@@ -56,13 +56,13 @@ class Transaction {
 
 
     static signTransaction(fromAd, toAd, ammount, privateKey,fee) {
-        let publicKey = crypto.getPublicKey(privateKey).toString('hex')
-        let addressFromPublic = crypto.publiKeyToAddres(publicKey)
-        if(addressFromPublic!==fromAd)throw new Error("This is not your address")
+        let privateKeyBuffer = Buffer.from(privateKey, 'hex')
+        let publicKey =  crypto.getPublicKey(privateKeyBuffer).toString('hex')
         let date = new Date().getTime()
-        let dataToSign = [fromAd, toAd, ammount,date]
+        let dataToSign = fromAd + toAd + ammount
         let signature = crypto.sign(dataToSign, privateKey)
-        let kkk = crypto.checkSign(dataToSign,signature,publicKey)
+        let signatureCheck = crypto.checkSign(dataToSign,signature,publicKey)
+        if(!signatureCheck)throw new Error("Signature Fail")
         let hexSignature = crypto.convertUIntToHex(signature)
         let signedTransaction = new Transaction(fromAd, toAd, ammount, publicKey, hexSignature, date,fee)
         return signedTransaction

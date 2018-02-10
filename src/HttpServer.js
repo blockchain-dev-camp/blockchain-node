@@ -133,11 +133,7 @@ let init = function (port) {
             }
         )
     });
-    app.get('/key', function (req, res) {
-        res.send(
-            Crypto.generateKeys()
-        )
-    });
+    
     app.listen(port, function () {
         console.log(`Http server started at port ${port}`)
     });
