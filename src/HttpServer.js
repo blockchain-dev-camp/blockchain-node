@@ -37,6 +37,8 @@ let init = function (port) {
     app.post('/mineBlock', function (req, res) {
         const newBlock = chain.generateNextBlock(req.body.data, localNode.getTransactions());
         localNode.addBlockToChain(newBlock)
+        localNode.clearTransactions()
+
         res.send(newBlock);
     });
     app.get('/mineBlock/:address', function (req, res) {
