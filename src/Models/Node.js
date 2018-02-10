@@ -22,7 +22,11 @@ class Node {
         this.Balances = {} // map(address => number)
         this.Balances[this.godAddress]=1000000000
 
-
+        // Genesis transactions 
+        let faucetAddress = '44a161dd6354d38eef62e571888a2d8c0d81a73c'
+        let transaction = Transaction.signTransaction(this.godAddress, faucetAddress, 100000, this.godPvKey, 0)
+        transaction.paid = true
+        this.blockChain.blocks[0].transactions.push(transaction)
     }
 
     addTransactions(tx) {

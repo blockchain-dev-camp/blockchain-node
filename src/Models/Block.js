@@ -2,6 +2,9 @@ const crypto = require('./Crypto')
 class Block {
     constructor(index, blockHash, previousHash, timestamp, difficulty, nounce, transactions, minedBy) {
         this.index = index
+        transactions.forEach(transaction => {
+            transaction.paid = true
+        });
         this.transactions = transactions
         this.transactionsHash = crypto.calculateSHA256(transactions)    
         this.difficulty = difficulty
