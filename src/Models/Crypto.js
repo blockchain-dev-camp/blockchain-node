@@ -35,7 +35,7 @@ class Crypto {
         let publicKey = secp256k1.publicKeyCreate(privKey, true)
         let pvHex = this.convertUIntToHex(privKey)
         let pbHex = this.convertUIntToHex(publicKey)
-        return [pvHex, pbHex]
+        return {privateKey:pvHex, publicKey:pbHex, address:this.publiKeyToAddres(pbHex)}
     }
 
     static hashAndBuffer(obj) {

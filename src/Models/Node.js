@@ -11,14 +11,14 @@ class Node {
         this.PendingTransactions = [] // Transaction[]
         this.Difficulty = difficulty // number
         this.MiningJobs = new Map() // map(address => Block)
-        this.privateKey = keysForNode[0]
-        this.publicKey = keysForNode[1]
+        this.privateKey = keysForNode.privateKey
+        this.publicKey = keysForNode.publicKey
         this.address = crypto.publiKeyToAddres(this.publicKey)
         this.feePercent = 0.01 //1%
         this.blockGodReward = 20
         this.godPvKey = '57da87852534fc39cec621550a0b701e18132b92f924172ace529490ebdafb04'
         this.godPbKey = '04c5c2a12455a2712b2d0d42d0ad13f47764a19fcae3975974111d38428c2bd6f3864a1424d6fba5b05868d2b4f89931a4aac53b714efe4ce00f5dc830089c2d72'
-        this.godAddress = crypto.publiKeyToAddres(this.godPbKey)
+        this.godAddress = keysForNode.address
         this.Balances = {} // map(address => number)
         this.Balances[this.godAddress]=1000000000
 
@@ -89,7 +89,6 @@ class Node {
             nounce)
         if (wholeHash === blockHash) {
             let rr = this.MiningJobs.delete(address)
-            this.balanceUpdate()
             return miningJob
         }
 
@@ -97,12 +96,14 @@ class Node {
     }
 
     balanceUpdate() {
+        let allTransactionsIds = {}
         let blocks = this.blockChain.blocks
         let balances = this.Balances
         for (let i = 0; i < blocks.length; i++) {
             let transactions = blocks[i].transactions
             for (let j = 0; j < transactions.length; j++) {
                 let transaction = transactions[j]
+                allTransactionsIds[transaction.transactionId] = 1
                 if (!balances[transaction.toAddress])
                     balances[transaction.toAddress] = 0
                 if (!balances[transaction.fromAddress])
@@ -111,10 +112,26 @@ class Node {
                 balances[transaction.toAddress] += transaction.value
             }
         }
+        for (let i = 0; i < this.PendingTransactions.length; i++) {
+            let tr = this.PendingTransactions[i];
+            let trid = tr.transactionId
+            if(allTransactionsIds[trid]){
+                let pendingTr = this.PendingTransactions
+                while (pendingTr.map(function(e) { return e.transactionId; }).indexOf(trid) !== -1) {
+                    pendingTr.splice(pendingTr.indexOf(trid), 1);
+                }
+            }
+        }
+
     }
 
     getBalance(address) {
         return this.Balances
+    }
+
+    addBlockToChain(block){
+        this.blockChain.addBlock(block)
+        this.balanceUpdate()
     }
 }
 

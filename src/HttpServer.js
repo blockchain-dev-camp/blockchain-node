@@ -36,7 +36,7 @@ let init = function (port) {
 
     app.post('/mineBlock', function (req, res) {
         const newBlock = chain.generateNextBlock(req.body.data, localNode.getTransactions());
-        localNode.blockChain.addBlock(newBlock)
+        localNode.addBlockToChain(newBlock)
         res.send(newBlock);
     });
     app.get('/mineBlock/:address', function (req, res) {
@@ -72,15 +72,13 @@ let init = function (port) {
         let blockHash = req.body.blockHash
         let result = localNode.checkMiningJob(address, nounce, dateCreated, blockHash)
         if (result) {
-            let previousHash = localNode.blockChain.getLatestBlock().blockHash;
             let out = {
                 nonce: nounce,
                 dateCreated: new Date(dateCreated),
                 blockHash: blockHash
             }
             let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
-            localNode.blockChain.addBlock(block)
-            localNode.balanceUpdate()
+            localNode.addBlockToChain(block)
             res.send([out,localNode.Balances])
         }
     })
@@ -88,7 +86,7 @@ let init = function (port) {
 
     app.post('/addBlock', function (req, res) {
         const newBlock = chain.generateNextBlock(req.body.data)
-        localNode.blockChain.addBlock(newBlock)
+        localNode.addBlockToChain(newBlock)
         res.send(newBlock);
     });
 
@@ -113,6 +111,21 @@ let init = function (port) {
     app.get('/transactions', function (req, res) {
         res.send(
             localNode.getTransactions()
+        )
+    });
+    app.post('/transactions/sign', function (req, res) {
+        let from = req.body.fromAddress
+        let to = req.body.toAddress
+        let value = req.body.value
+        let privateKey = req.body.privateKey
+        let tr = Transaction.signTransaction(from, to, value, privateKey, localNode.feePercent)
+        res.send(
+            tr
+        )
+    });
+    app.get('/key', function (req, res) {
+        res.send(
+            Crypto.generateKeys()
         )
     });
     app.post('/transactions/new', function (req, res) {
@@ -145,6 +158,9 @@ let init = function (port) {
             }
         )
     });
+    app.get('/balance', (req, res) => {
+        res.send(localNode.getBalance())
+    })
     app.get('/info', (req, res) => {
         res.send(
             {
