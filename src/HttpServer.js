@@ -138,27 +138,6 @@ let init = function (port) {
             Crypto.generateKeys()
         )
     });
-    app.post('/transactions/sign', function (req, res) {
-
-        let from = req.body.fromAddress
-        let to = req.body.toAddress
-        let value = req.body.value
-        let privateKey = req.body.privateKey
-        let tr = Transaction.signTransaction(from, to, value, privateKey,localNode.feePercent)
-        res.send(
-            tr
-        )
-    })
-    app.post('/trsgn', function (req, res) {
-        let from = "20f4309c6ff9164a95071b3489962200140d356a"
-        let to = "a369d21d62fa3f03845ace5c9beaba29820c0789"
-        let value = 324
-        let privateKey = "208b21e2ef3a51076029d4e5e34c1749447b82993adfcb5f077d9e7bf29ab7b8"
-        let tr = Transaction.signTransaction(from, to, value, privateKey)
-        res.send(
-            tr
-        )
-    });
     app.listen(port, function () {
         console.log(`Http server started at port ${port}`)
     });
