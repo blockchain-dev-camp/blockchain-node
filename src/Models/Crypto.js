@@ -2,7 +2,7 @@ const cryptoJs = require('crypto-js')
 const ecdsa = require('elliptic')
 const ec = new ecdsa.ec('secp256k1')
 const RPMD160 = require('ripemd160')
-const {randomBytes} = require('crypto')
+const crypto = require('crypto')
 const secp256k1 = require('secp256k1')
 
 class Crypto {
@@ -30,7 +30,7 @@ class Crypto {
     static generateKeys() {
         let privKey
         do {
-            privKey = randomBytes(32)
+            privKey = crypto.randomBytes(32)
         } while (!secp256k1.privateKeyVerify(privKey))
         let publicKey = secp256k1.publicKeyCreate(privKey, true)
         let pvHex = this.convertUIntToHex(privKey)
@@ -51,11 +51,13 @@ class Crypto {
     }
 
     static checkSign(message, signature, publicKey) {
-        let sign = secp256k1.signatureImport(signature)
-        let messageToCheck = this.hashAndBuffer(message)
-        let keyAsArray = this.converHexToUint(publicKey)
-        let result = secp256k1.verify(messageToCheck, sign, keyAsArray)
-        return result
+        var keyBuffer = Buffer.from(publicKey, 'hex');
+        var key  = secp256k1.publicKeyConvert(keyBuffer, false);
+        var msgBuffer = crypto.createHash("sha256").update(message).digest();
+        var sig = Buffer.from(signature, 'hex');
+        sig = secp256k1.signatureImport(sig);
+
+        return secp256k1.verify(msgBuffer, sig, key);
     }
 
     static getPublicKey(privateKey) {

@@ -49,11 +49,8 @@ class Transaction {
         )
         //number
         this.fee = transactionValue*feePercent
-        let message = [this.fromAddress, this.toAddress, this.value,this.dateOfSign]
-        let signAsBuffer =(crypto.converHexToUint(this.senderSignature))
-        let addressFromPublic = crypto.publiKeyToAddres(this.senderPubKey)
-        if(addressFromPublic!==this.fromAddress)throw new Error("This is not your address")
-        let signatureCheck = crypto.checkSign(message, signAsBuffer, this.senderPubKey)
+        let message = this.fromAddress + this.toAddress + this.value;
+        let signatureCheck = crypto.checkSign(message, this.senderSignature, this.senderPubKey)
         if(!signatureCheck)throw new Error("Signature Fail")
     }
 

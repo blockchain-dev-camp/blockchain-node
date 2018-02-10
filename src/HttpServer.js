@@ -122,7 +122,8 @@ let init = function (port) {
             req.body.value,
             req.body.senderPubKey,
             req.body.senderSignature,
-            req.body.dateOfSign)
+            req.body.dateOfSign,
+            0)
         if (transaction)
             localNode.addTransactions(transaction)
         res.send(
