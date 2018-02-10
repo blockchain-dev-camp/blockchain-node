@@ -28,7 +28,9 @@ class Node {
         transaction.paid = true
         this.blockChain.blocks[0].transactions.push(transaction)
     }
-
+    clearTransactions(){
+        this.PendingTransactions = [];
+    }
     addTransactions(tx) {
         this.PendingTransactions.push(tx)
     }
