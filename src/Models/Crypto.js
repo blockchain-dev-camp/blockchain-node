@@ -44,7 +44,6 @@ class Crypto {
     }
 
     static sign(message, privateKey) {
-        console.log(secp256k1.sign)
         let sign = secp256k1.sign(this.hashAndBuffer(message), Buffer.from(privateKey, "hex"))
         let signDER = secp256k1.signatureExport(sign.signature)
         return signDER

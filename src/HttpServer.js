@@ -133,7 +133,7 @@ let init = function (port) {
             }
         )
     });
-    
+
     app.listen(port, function () {
         console.log(`Http server started at port ${port}`)
     });
