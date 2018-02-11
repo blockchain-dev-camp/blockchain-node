@@ -88,8 +88,9 @@ let init = function (port, localNode) {
             };
 
             let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
-            localNode.addBlockToChain(block)
-            res.send([out, localNode.balances])
+            localNode.addBlockToChain(block);
+            P2P.broadcastLatest();
+            res.send([out, localNode.balances]);
         }
     })
 
@@ -208,7 +209,7 @@ let init = function (port, localNode) {
             addresses: localNode.address,
             coins: localNode.balances[localNode.godAddress]
         };
-        
+
         res.send(out);
     });
 

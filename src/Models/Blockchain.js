@@ -86,7 +86,7 @@ class Blockchain {
             console.log('invalid previoushash');
             result = false
         }
-        else if ((newBlock.calculateHashForBlock()) !== newBlock.blockHash) {
+        else if ((Block.calculateHashForBlock(newBlock)) !== newBlock.blockHash) {
             console.log('Invalid hash');
             result = false
         }
@@ -142,5 +142,4 @@ class Blockchain {
     ;
 }
 
-module
-    .exports = Blockchain
+module.exports = Blockchain

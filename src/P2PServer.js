@@ -1,23 +1,16 @@
 const WebSocket = require('ws');
 
-const Block = require('./Models/Block')
+const Block = require('./Models/Block');
 
-const BC = require('./Models/Blockchain')
-const addBlockToChain = BC.addBlockToChain
-const getBlockchain = BC.getBlockchain
-const getLatestBlock = BC.getLatestBlock
-const isValidBlockStructure = BC.isValidBlockStructure
-const replaceChain = BC.replaceChain
+let BC;
+const P2PMessage = require('./Models/P2PMessage');
+const Message = P2PMessage.Message;
+const MessageType = P2PMessage.MessageType;
 
-const P2PMessage = require('./Models/P2PMessage')
-const Message = P2PMessage.Message
-const MessageType = P2PMessage.MessageType
-
-
-let sockets = []
+let sockets = [];
 
 let getSockets = function () {
-    return sockets
+    return sockets;
 }
 
 let write = function (ws, message) {
@@ -25,23 +18,23 @@ let write = function (ws, message) {
 }
 
 let queryChainLengthMsg = function () {
-    let message = Message(MessageType.QUERY_LATEST, null)
-    return message
+    let message = new Message(MessageType.QUERY_LATEST, null);
+    return message;
 }
 
 const queryAllMsg = function () {
-    let message = Message(MessageType.QUERY_ALL, null)
-    return message
+    let message = new Message(MessageType.QUERY_ALL, null);
+    return message;
 };
 
 let responseChainMsg = function () {
-    let message = Message(MessageType.RESPONSE_BLOCKCHAIN, JSON.stringify(getBlockchain()))
-    return message
+    let message = new Message(MessageType.RESPONSE_BLOCKCHAIN, JSON.stringify(BC.getBlockchain()));
+    return message;
 }
 
 let responseLatestMsg = function () {
-    let message = Message(MessageType.RESPONSE_BLOCKCHAIN, JSON.stringify([getLatestBlock()]))
-    return message
+    let message = new Message(MessageType.RESPONSE_BLOCKCHAIN, JSON.stringify([BC.getLatestBlock()]));
+    return message;
 };
 
 let broadcast = function (message) {
@@ -52,15 +45,17 @@ let broadcastLatest = function () {
     broadcast(responseLatestMsg());
 };
 
-let init = function (port) {
-    let webSocket = require("ws")
+let init = function (port, bc) {
+    BC = bc;
+
+    let webSocket = require('ws')
     let server = new webSocket.Server({ port: port })
 
-    server.on("connection", function (ws) {
+    server.on('connection', function (ws) {
         initConnection(ws)
     })
 
-    console.log("P2P server started at port: " + port);
+    console.log('P2P server started at port: ' + port);
 }
 
 function initConnection(ws) {
@@ -72,8 +67,9 @@ function initConnection(ws) {
 
 function initMessageHandler(ws) {
     ws.on('message', function (data) {
-        let message = JSON.parse(data);
-        console.log('Received message: ' + JSON.stringify(message));
+        console.log('Received message: ' + data);
+        let message = JSON.parse(data);        
+
         switch (parseInt(message.type)) {
             case MessageType.QUERY_LATEST:
                 write(ws, responseLatestMsg());
@@ -85,10 +81,13 @@ function initMessageHandler(ws) {
 
             case MessageType.RESPONSE_BLOCKCHAIN:
                 let receivedBlocks = JSON.parse(message.data);
-                if (receivedBlocks)
+                if (receivedBlocks) {
                     handleBlockchainResponse(receivedBlocks);
-                else
-                    console.log("Invalid recieved blocks: " + JSON.stringify(message.data))
+                }
+                else {
+                    console.log('Invalid recieved blocks: ' + JSON.stringify(message.data))
+                }
+                    
                 break;
         }
     });
@@ -99,6 +98,7 @@ let initErrorHandler = function (ws) {
         console.log('connection failed to peer: ' + wsToClose.url);
         sockets.splice(sockets.indexOf(wsToClose), 1);
     };
+
     ws.on('close', () => closeConnection(ws));
     ws.on('error', () => closeConnection(ws));
 };
@@ -110,18 +110,18 @@ let handleBlockchainResponse = function (receivedBlocks) {
     }
 
     const latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
-    if (!isValidBlockStructure(latestBlockReceived)) {
+    if (!BC.isValidBlockStructure(latestBlockReceived)) {
         console.log('block structuture not valid');
         return;
     }
 
-    let latestBlockHeld = getLatestBlock();
+    let latestBlockHeld = BC.getLatestBlock();
     if (latestBlockReceived.index > latestBlockHeld.index) {
 
         console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
 
         if (latestBlockHeld.hash === latestBlockReceived.previousHash) {
-            if (addBlockToChain(latestBlockReceived)) {
+            if (BC.addBlockToChain(latestBlockReceived)) {
                 broadcast(responseLatestMsg());
             }
         }
@@ -144,6 +144,7 @@ let connectToPeers = function (newPeer) {
     ws.on('open', () => {
         initConnection(ws);
     });
+    
     ws.on('error', () => {
         return false;
     });
