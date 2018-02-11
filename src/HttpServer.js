@@ -6,15 +6,12 @@ const Crypto = require('./Models/Crypto')
 
 //const getBlockchain = BC.getBlockchain
 //const generateNextBlock = BC.generateNextBlock
-let chain = new BC()
-let localNode = new Node(chain, 3)
-
 const P2P = require('./P2PServer')
 const getSockets = P2P.getSockets
 const connectToPeers = P2P.connectToPeers
 
 
-let init = function (port) {
+let init = function (port,localNode) {
 
     let bodyParser = require('body-parser')
     let app = require('express')()
@@ -35,11 +32,28 @@ let init = function (port) {
     });
 
     app.post('/mineBlock', function (req, res) {
-        let newBlock = localNode.blockChain.generateNextBlock(localNode);
-        localNode.addBlockToChain(newBlock)
-        //localNode.clearTransactions()
+        let miningInfo = localNode.mineAddress(localNode.address)
+        let minerData = localNode.blockChain.mine(miningInfo.blockDataHash, miningInfo.difficulty)
+        let mineAnswer = {
+            nounce: minerData.nounce,
+            dateCreated: minerData.nextTimestamp,
+            blockHash: minerData.nextBlockHash
+        }
+        let address = localNode.address;
+        let nounce = minerData.nounce;
+        let dateCreated = minerData.nextTimestamp
+        let blockHash = minerData.nextBlockHash
+        let result = localNode.checkMiningJob(address, nounce, dateCreated, blockHash)
+        if (result) {
+            let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
+            localNode.addBlockToChain(block)
+            res.send([block, localNode.balances])
+        }
 
-        res.send(newBlock);
+        // let newBlock = localNode.blockChain.generateNextBlock(localNode);
+        // localNode.addBlockToChain(newBlock)
+        //localNode.clearTransactions()
+        // res.send(newBlock);
     });
     app.get('/mineBlock/:address', function (req, res) {
         let address = req.params.address;
@@ -144,17 +158,17 @@ let init = function (port) {
         let trBlockNumber = localNode.allTransactions[transactionId]
         let transactionInBlockcahin
         if (trBlockNumber) {
-            let block = this.blockChain.blocks[trBlockNumber]
+            let block = localNode.blockChain.blocks[trBlockNumber]
             let tr = block.transactions.find(function (t) {
                 return t.transactionId === transactionId
             })
-
+            transactionInBlockcahin = tr;
         }
 
         res.send(
             {
-                "transaction": transaction,
-                "transactionInBlockChain": transactionInBlockcahin
+                "transaction": transaction||transactionInBlockcahin
+
             }
         )
     });

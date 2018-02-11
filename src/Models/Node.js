@@ -5,7 +5,6 @@ let Transaction = require('./Transaction')
 class Node {
     constructor(blockChain, difficulty) {
         let keysForNode = crypto.generateKeys()
-        let keysForGod = crypto.generateKeys()
         this.Peers = [] // URL[]
         this.blockChain = blockChain // blockChain
         this.PendingTransactions = [] // Transaction[]
@@ -18,7 +17,7 @@ class Node {
         this.blockGodReward = 20
         this.godPvKey = '57da87852534fc39cec621550a0b701e18132b92f924172ace529490ebdafb04'
         this.godPbKey = '04c5c2a12455a2712b2d0d42d0ad13f47764a19fcae3975974111d38428c2bd6f3864a1424d6fba5b05868d2b4f89931a4aac53b714efe4ce00f5dc830089c2d72'
-        this.godAddress = keysForNode.address
+        this.godAddress = crypto.publiKeyToAddres(this.godPbKey)
         this.balances = {} // map(address => number)
         this.balances[this.godAddress] = 1000000000
         this.allTransactions = {};
@@ -106,17 +105,20 @@ class Node {
             hashForMiner,
             dateCreated,
             nounce)
-        if (wholeHash === blockHash) {
-            let rr = this.MiningJobs.delete(address)
-            return miningJob
+        if (!wholeHash === blockHash) {
+            return false
         }
+        let rr = this.MiningJobs.delete(address)
 
-        return false
+
+
+        return miningJob
     }
 
     balanceUpdate() {
         let blocks = this.blockChain.blocks
         let balances = this.balances
+        balances = {}
         for (let i = 0; i < blocks.length; i++) {
             let transactions = blocks[i].transactions
             for (let j = 0; j < transactions.length; j++) {

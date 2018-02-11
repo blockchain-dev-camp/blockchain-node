@@ -4,11 +4,11 @@ const P2P = require('./P2PServer')
 const getSockets = P2P.getSockets
 const connectToPeers = P2P.connectToPeers
 
-let chain = new BC()
-let localNode = new Node(chain, 3)
+let localNode
 
 module.exports = () => {
-    this.init = () => {
+    this.init = (node) => {
+        localNode = node
         const readline = require('readline');
 
         const rl = readline.createInterface({
@@ -19,15 +19,15 @@ module.exports = () => {
         rl.on('line', (input) => {
             var values = input.split(" ");
 
-            if ( values[0] == "add_peer" ) {
-                add_peer( values[1] );
+            if (values[0] == "add_peer") {
+                add_peer(values[1]);
             }
 
-            if ( values[0] == "get_block" ) {
+            if (values[0] == "get_block") {
                 get_block();
             }
 
-            if ( values[0] == "get_balances" ) {
+            if (values[0] == "get_balances") {
                 get_balances();
             }
 
@@ -37,25 +37,25 @@ module.exports = () => {
     return this;
 }
 
-function add_peer( peer ){
+function add_peer(peer) {
     var connection = connectToPeers(peer);
 
     if (connection == false) {
         console_message("Connection to this peer failed");
-    }else{
+    } else {
         console_message("Peer " + peer + " added successfully.")
     }
 }
 
 function get_block() {
-    console_message( localNode.blockChain.getBlockchain() );
+    console_message(localNode.blockChain.getBlockchain());
 }
 
 function get_balances() {
-    console_message( localNode.balances );
+    console_message(localNode.balances);
 }
 
-function console_message( message ){
+function console_message(message) {
     console.log();
-    console.log( message );
+    console.log(message);
 }
