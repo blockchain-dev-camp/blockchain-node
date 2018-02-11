@@ -16,22 +16,21 @@ class Block {
         this.timestamp = timestamp
     }
 
-    calculateHashForBlock() {
+    static calculateHashForBlock(block) {
         let hashForMiner = crypto.calculateSHA256(
-            this.prevBlockHash,
-            this.index,
-            this.difficulty,
-            this.transactionsHash,
-            this.minedBy
-    )
+            block.prevBlockHash,
+            block.index,
+            block.difficulty,
+            block.transactionsHash,
+            block.minedBy);
 
         let wholeHash = crypto.calculateSHA256(
             hashForMiner,
-            this.timestamp,
-            this.nounce)
-        return wholeHash
+            block.timestamp,
+            block.nounce);
+            
+        return wholeHash;
     }
-
 }
 
 module.exports = Block

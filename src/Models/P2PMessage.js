@@ -1,8 +1,8 @@
-
-let Message = (type, data) => {
-    this.type
-    this.data
-    return this
+class Message {
+    constructor(type, data) {
+        this.type = type;
+        this.data = data;
+    }
 }
 
 let MessageType = {
