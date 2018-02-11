@@ -51,11 +51,7 @@ class Node {
         return reward
     }
 
-    mineAddress(address) {
-        if (!this.PendingTransactions.length) {
-            return false;
-        }
-
+    mineData(address) {
         let index = this.blockChain.blocks.length;
         let transactionsIncluded = this.PendingTransactions.length;
         let difficulty = this.Difficulty;
@@ -129,7 +125,7 @@ class Node {
             let transactions = blocks[i].transactions
             for (let j = 0; j < transactions.length; j++) {
                 let transaction = transactions[j]
-                this.allTransactions[transaction.transactionId] = i
+                this.allTransactions[transaction.transactionId] = transaction
                 if (!balances[transaction.toAddress])
                     balances[transaction.toAddress] = 0
                 if (!balances[transaction.fromAddress])
@@ -160,6 +156,10 @@ class Node {
     addBlockToChain(block) {
         this.blockChain.addBlock(block)
         this.balanceUpdate()
+    }
+
+    getBalancesByConf(address,conf){
+        ///TODO
     }
 }
 

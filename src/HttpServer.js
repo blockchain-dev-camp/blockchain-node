@@ -26,9 +26,26 @@ let init = function (port, localNode) {
     app.get('/balances', function (req, res) {
         res.send(localNode.balances);
     });
+    app.get('/balance/:address/confirmations/:conf', function (req, res) {
+        let address = req.params.address;
+        let conf = req.params.conf;
+        let balance= localNode.getBalancesByConf(address,conf)
+        let confirmedBalance = {}
+        let lastMinedBalance = {}
+        let pendingBalance = {}
+
+        let out = {
+            address: address,
+            confirmedBalance: {"confirmations": 8, "balance": 120.00},
+            lastMinedBalance: {"confirmations": 1, "balance": 115.00},
+            pendingBalance: {"confirmations": 0, "balance": 170.20}
+
+        }
+        res.send(out);
+    });
 
     app.post('/mineBlock', function (req, res) {
-        let miningInfo = localNode.mineAddress(localNode.address)
+        let miningInfo = localNode.mineData(localNode.address)
         let minerData = localNode.blockChain.mine(miningInfo.blockDataHash, miningInfo.difficulty)
         let mineAnswer = {
             nounce: minerData.nounce,
@@ -54,7 +71,7 @@ let init = function (port, localNode) {
 
     app.get('/mineBlock/:address', function (req, res) {
         let address = req.params.address;
-        let miningJob = localNode.mineAddress(address);
+        let miningJob = localNode.mineData(address);
         if (!miningJob) {
             res.status(404).send('No mining job found.');
         } else {    
@@ -166,7 +183,7 @@ let init = function (port, localNode) {
         let transaction = transactions.find(function (t) {
             return t.transactionId === transactionId
         })
-        let trBlockNumber = localNode.allTransactions[transactionId]
+        let trBlockNumber = localNode.allTransactions[transactionId].minedInBlockIndex
         let transactionInBlockcahin
         if (trBlockNumber) {
             let block = localNode.blockChain.blocks[trBlockNumber]
