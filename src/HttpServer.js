@@ -73,7 +73,6 @@ let init = function (port) {
         }
     })
 
-
     app.post('/addBlock', function (req, res) {
         const newBlock = chain.generateNextBlock(req.body.data)
         localNode.addBlockToChain(newBlock)
@@ -151,7 +150,7 @@ let init = function (port) {
             })
 
         }
-        
+
         res.send(
             {
                 "transaction": transaction,

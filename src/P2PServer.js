@@ -28,6 +28,7 @@ let queryChainLengthMsg = function () {
     let message = Message(MessageType.QUERY_LATEST, null)
     return message
 }
+
 const queryAllMsg = function () {
     let message = Message(MessageType.QUERY_ALL, null)
     return message
@@ -50,7 +51,6 @@ let broadcast = function (message) {
 let broadcastLatest = function () {
     broadcast(responseLatestMsg());
 };
-
 
 let init = function (port) {
     let webSocket = require("ws")
@@ -85,7 +85,10 @@ function initMessageHandler(ws) {
 
             case MessageType.RESPONSE_BLOCKCHAIN:
                 let receivedBlocks = JSON.parse(message.data);
-                handleBlockchainResponse(receivedBlocks);
+                if (receivedBlocks)
+                    handleBlockchainResponse(receivedBlocks);
+                else
+                    console.log("Invalid recieved blocks: " + JSON.stringify(message.data))
                 break;
         }
     });
@@ -135,7 +138,6 @@ let handleBlockchainResponse = function (receivedBlocks) {
         console.log('received blockchain is not longer than received blockchain. Do nothing');
     }
 };
-
 
 let connectToPeers = function (newPeer) {
     let ws = new WebSocket(newPeer);
