@@ -1,3 +1,5 @@
+const crypto = require('./Crypto')
+
 class MiningJob {
     constructor(index, expectedReward, transactions, transactionsHash, prevBlockHash, difficulty, address) {
         this.index = index
@@ -7,6 +9,13 @@ class MiningJob {
         this.prevBlockHash = prevBlockHash
         this.difficulty = difficulty
         this.address = address
+        this.hashForMiner = crypto.calculateSHA256(
+            this.prevBlockHash,
+            this.index,
+            this.difficulty,
+            this.transactionsHash,
+            this.address
+        )
     }
 }
 

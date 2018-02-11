@@ -13,24 +13,27 @@ class Node {
         this.MiningJobs = new Map() // map(address => Block)
         this.privateKey = keysForNode.privateKey
         this.publicKey = keysForNode.publicKey
-        this.address = crypto.publiKeyToAddres(this.publicKey)
+        this.address = keysForNode.address
         this.feePercent = 0.01 //1%
         this.blockGodReward = 20
         this.godPvKey = '57da87852534fc39cec621550a0b701e18132b92f924172ace529490ebdafb04'
         this.godPbKey = '04c5c2a12455a2712b2d0d42d0ad13f47764a19fcae3975974111d38428c2bd6f3864a1424d6fba5b05868d2b4f89931a4aac53b714efe4ce00f5dc830089c2d72'
         this.godAddress = keysForNode.address
-        this.Balances = {} // map(address => number)
-        this.Balances[this.godAddress]=1000000000
+        this.balances = {} // map(address => number)
+        this.balances[this.godAddress] = 1000000000
+        this.allTransactions = {};
 
         // Genesis transactions 
         let faucetAddress = '44a161dd6354d38eef62e571888a2d8c0d81a73c'
-        let transaction = Transaction.signTransaction(this.godAddress, faucetAddress, 100000, this.godPvKey, 0)
+        let transaction = Transaction.signTransaction(this.godAddress, faucetAddress, 1000, this.godPvKey, 0)
         transaction.paid = true
-        this.blockChain.blocks[0].transactions.push(transaction)
+        this.PendingTransactions.push(transaction)
     }
-    clearTransactions(){
+
+    clearTransactions() {
         this.PendingTransactions = [];
     }
+
     addTransactions(tx) {
         this.PendingTransactions.push(tx)
     }
@@ -45,33 +48,47 @@ class Node {
             let fee = this.PendingTransactions[i].fee
             transactionsFee += fee
         }
-        let reward = this.blockGodReward + transactionsFee
+        let reward = {blockReward: this.blockGodReward, feeReward: transactionsFee}
         return reward
     }
 
-    getMiningJob(index, award, address, difficulty) {
+    mineAddress(address) {
+        let index = this.blockChain.blocks.length
+        let transactionsIncluded = this.PendingTransactions.length + 1
+        let difficulty = this.Difficulty
+        let miningJob = this.getMiningJob(index, address, difficulty)
+        return {
+            index: miningJob.index,
+            transactionsIncluded: transactionsIncluded,
+            expectedReward: miningJob.reward,
+            difficulty: difficulty,
+            blockDataHash: miningJob.hashForMiner
+        }
+    }
+
+    getMiningJob(index, address, difficulty) {
+        let reward = this.calculateReward()
         let transactions = this.getTransactions().slice()
-        let rewardForPool = this.feePercent * award
-        let rewardForMiner = award - rewardForPool
+        let rewardForPool = this.feePercent * reward.blockReward + reward.feeReward
+        let rewardForMiner = reward.blockReward - rewardForPool
 
 
-        let poolTransactionReward = Transaction.signTransaction(this.godAddress, this.address, award, this.godPvKey, 0)
+        let poolTransactionRewardFee = Transaction.signTransaction(this.godAddress, this.address, reward.feeReward, this.godPvKey, 0)
+        let poolTransactionReward = Transaction.signTransaction(this.godAddress, this.address, reward.blockReward, this.godPvKey, 0)
         let minerTransactionReward = Transaction.signTransaction(this.address, address, rewardForMiner, this.privateKey, 0)
         transactions.push(poolTransactionReward)
+        transactions.push(poolTransactionRewardFee)
         transactions.push(minerTransactionReward)
+        transactions.forEach(x => {
+            x.paid = true;
+            x.minedInBlockIndex = index;
+        })
+
         let transactionHash = crypto.calculateSHA256(transactions)
         let prevBlockHash = this.blockChain.getLatestBlock().blockHash
-        let job = new MiningJob(index, award, transactions, transactionHash, prevBlockHash, difficulty, address)
+        let job = new MiningJob(index, rewardForMiner, transactions, transactionHash, prevBlockHash, difficulty, address)
         this.MiningJobs.set(address, job)
-        let hashForMiner = crypto.calculateSHA256(
-            job.prevBlockHash,
-            job.index,
-            job.difficulty,
-            job.transactionsHash,
-            job.address
-        )
-
-        return hashForMiner
+        return job
     }
 
     checkMiningJob(address, nounce, dateCreated, blockHash) {
@@ -98,14 +115,13 @@ class Node {
     }
 
     balanceUpdate() {
-        let allTransactionsIds = {}
         let blocks = this.blockChain.blocks
-        let balances = this.Balances
+        let balances = this.balances
         for (let i = 0; i < blocks.length; i++) {
             let transactions = blocks[i].transactions
             for (let j = 0; j < transactions.length; j++) {
                 let transaction = transactions[j]
-                allTransactionsIds[transaction.transactionId] = 1
+                this.allTransactions[transaction.transactionId] = i
                 if (!balances[transaction.toAddress])
                     balances[transaction.toAddress] = 0
                 if (!balances[transaction.fromAddress])
@@ -117,21 +133,22 @@ class Node {
         for (let i = 0; i < this.PendingTransactions.length; i++) {
             let tr = this.PendingTransactions[i];
             let trid = tr.transactionId
-            if(allTransactionsIds[trid]){
+            if (this.allTransactions[trid]) {
                 let pendingTr = this.PendingTransactions
-                while (pendingTr.map(function(e) { return e.transactionId; }).indexOf(trid) !== -1) {
+                while (pendingTr.map(function (e) {
+                    return e.transactionId;
+                }).indexOf(trid) !== -1) {
                     pendingTr.splice(pendingTr.indexOf(trid), 1);
                 }
             }
         }
-
     }
 
     getBalance(address) {
-        return this.Balances
+        return this.balances
     }
 
-    addBlockToChain(block){
+    addBlockToChain(block) {
         this.blockChain.addBlock(block)
         this.balanceUpdate()
     }

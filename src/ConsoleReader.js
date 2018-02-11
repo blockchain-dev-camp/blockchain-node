@@ -52,7 +52,7 @@ function get_block() {
 }
 
 function get_balances() {
-    console_message( localNode.Balances );
+    console_message( localNode.balances );
 }
 
 function console_message( message ){

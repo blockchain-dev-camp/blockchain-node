@@ -1,4 +1,4 @@
-const httpPort = parseInt(process.argv.slice(2)[0]) || 5555;
+const httpPort = parseInt(process.argv.slice(2)[0]) || 3000;
 const p2pPort = parseInt(process.argv.slice(3)[0]) || 6000;
 
 let httpServer = require('./HttpServer')

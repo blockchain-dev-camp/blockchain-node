@@ -31,34 +31,22 @@ let init = function (port) {
     });
 
     app.get('/balances', function (req, res) {
-        res.send(localNode.Balances);
+        res.send(localNode.balances);
     });
 
     app.post('/mineBlock', function (req, res) {
-        const newBlock = chain.generateNextBlock(req.body.data, localNode.getTransactions());
+        let newBlock = localNode.blockChain.generateNextBlock(localNode);
         localNode.addBlockToChain(newBlock)
-        localNode.clearTransactions()
+        //localNode.clearTransactions()
 
         res.send(newBlock);
     });
     app.get('/mineBlock/:address', function (req, res) {
         let address = req.params.address;
-        let index = localNode.blockChain.blocks.length
-        let transactionsIncluded = localNode.getTransactions().length + 1
-        let expectedReward = localNode.calculateReward()
-        let difficulty = localNode.Difficulty
-        let blockDataHash = localNode.getMiningJob(index, expectedReward, address, difficulty)
-        let out = {
-            index: index,
-            transactionsIncluded: transactionsIncluded,
-            expectedReward: expectedReward,
-            difficulty: difficulty,
-            blockDataHash: blockDataHash
-        }
+        let out = localNode.mineAddress(address)
 
         //Answer for easy testing
-
-        let minerData = localNode.blockChain.mine(blockDataHash, difficulty)
+        let minerData = localNode.blockChain.mine(out.blockDataHash, out.difficulty)
         let mineAnswer = {
             nounce: minerData.nounce,
             dateCreated: minerData.nextTimestamp,
@@ -81,7 +69,7 @@ let init = function (port) {
             }
             let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
             localNode.addBlockToChain(block)
-            res.send([out,localNode.Balances])
+            res.send([out, localNode.balances])
         }
     })
 
@@ -151,12 +139,24 @@ let init = function (port) {
     app.get('/transaction/:transactionId/info', (req, res) => {
         let transactionId = req.params.transactionId;
         let transactions = localNode.getTransactions()
-        let transaction = transactions.find(function(t){
+        let transaction = transactions.find(function (t) {
             return t.transactionId === transactionId
         })
+        let trBlockNumber = localNode.allTransactions[transactionId]
+        let transactionInBlockcahin
+        if (trBlockNumber) {
+            let block = this.blockChain.blocks[trBlockNumber]
+            let tr = block.transactions.find(function (t) {
+                return t.transactionId === transactionId
+            })
+
+        }
+
+
         res.send(
             {
                 "transaction": transaction,
+                "transactionInBlockChain": transactionInBlockcahin
             }
         )
     });

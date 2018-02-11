@@ -15,14 +15,14 @@ class Blockchain {
         return this.blocks[this.blocks.length - 1];
     }
 
-    generateNextBlock(blockData, pendingTransactions) {
+    generateNextBlock(localNode) {
         //pool part for hash
         let previousBlock = this.getLatestBlock()
         let nextIndex = previousBlock.index + 1
         let difficulty = 3
-        let transactions = pendingTransactions
+        let transactions = localNode.getTransactions().slice()
         let transactionHash = crypto.calculateSHA256(transactions)
-        let mineBy = "pencho"
+        let mineBy = localNode.address
 
         let hashForMiner = crypto.calculateSHA256(
             previousBlock.blockHash,
