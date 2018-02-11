@@ -11,7 +11,7 @@ const getSockets = P2P.getSockets
 const connectToPeers = P2P.connectToPeers
 
 
-let init = function (port,localNode) {
+let init = function (port, localNode) {
 
     let bodyParser = require('body-parser')
     let app = require('express')()
@@ -167,8 +167,7 @@ let init = function (port,localNode) {
 
         res.send(
             {
-                "transaction": transaction||transactionInBlockcahin
-
+                "transaction": transaction || transactionInBlockcahin
             }
         )
     });
@@ -176,11 +175,19 @@ let init = function (port,localNode) {
         res.send(localNode.getBalance())
     })
     app.get('/info', (req, res) => {
-        res.send(
-            {
-                "name": 'blockchain node'
-            }
-        )
+
+
+        let out = {
+            about: "SoftUniChain/0.0009-nodeJs",
+            nodeName: localNode.address,
+            confirmedTransactions: Object.keys(localNode.allTransactions).length,
+            peers: localNode.Peers.length,
+            blocks: localNode.blockChain.blocks.length,
+            pendingTransactions: localNode.PendingTransactions.length,
+            addresses: localNode.address,
+            coins: localNode.balances[localNode.godAddress]
+        }
+        res.send(out)
     });
 
     app.listen(port, function () {
@@ -188,4 +195,4 @@ let init = function (port,localNode) {
     });
 }
 
-module.exports = { init }
+module.exports = {init}

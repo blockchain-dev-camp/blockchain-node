@@ -1,6 +1,7 @@
 let MiningJob = require('./miningJob')
 const crypto = require('./Crypto')
 let Transaction = require('./Transaction')
+const MONEY_IN_CIRCULATION = 1000000000
 
 class Node {
     constructor(blockChain, difficulty) {
@@ -115,6 +116,7 @@ class Node {
     balanceUpdate() {
         let blocks = this.blockChain.blocks
         let balances = {}
+        balances[this.godAddress] = MONEY_IN_CIRCULATION
         for (let i = 0; i < blocks.length; i++) {
             let transactions = blocks[i].transactions
             for (let j = 0; j < transactions.length; j++) {
@@ -128,7 +130,7 @@ class Node {
                 balances[transaction.toAddress] += transaction.value
             }
         }
-        this.balances=balances
+        this.balances = balances
         for (let i = 0; i < this.PendingTransactions.length; i++) {
             let tr = this.PendingTransactions[i];
             let trid = tr.transactionId
