@@ -19,7 +19,6 @@ class Node {
         this.godPbKey = '04c5c2a12455a2712b2d0d42d0ad13f47764a19fcae3975974111d38428c2bd6f3864a1424d6fba5b05868d2b4f89931a4aac53b714efe4ce00f5dc830089c2d72'
         this.godAddress = crypto.publiKeyToAddres(this.godPbKey)
         this.balances = {} // map(address => number)
-        this.balances[this.godAddress] = 1000000000
         this.allTransactions = {};
 
         // Genesis transactions 
@@ -108,17 +107,14 @@ class Node {
         if (!wholeHash === blockHash) {
             return false
         }
-        let rr = this.MiningJobs.delete(address)
-
-
+        this.MiningJobs.clear()
 
         return miningJob
     }
 
     balanceUpdate() {
         let blocks = this.blockChain.blocks
-        let balances = this.balances
-        balances = {}
+        let balances = {}
         for (let i = 0; i < blocks.length; i++) {
             let transactions = blocks[i].transactions
             for (let j = 0; j < transactions.length; j++) {
@@ -132,6 +128,7 @@ class Node {
                 balances[transaction.toAddress] += transaction.value
             }
         }
+        this.balances=balances
         for (let i = 0; i < this.PendingTransactions.length; i++) {
             let tr = this.PendingTransactions[i];
             let trid = tr.transactionId
