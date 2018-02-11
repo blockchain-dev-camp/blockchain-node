@@ -151,8 +151,7 @@ let init = function (port) {
             })
 
         }
-
-
+        
         res.send(
             {
                 "transaction": transaction,
@@ -176,4 +175,4 @@ let init = function (port) {
     });
 }
 
-module.exports = {init}
+module.exports = { init }

@@ -84,7 +84,7 @@ function initMessageHandler(ws) {
                 break;
 
             case MessageType.RESPONSE_BLOCKCHAIN:
-                let receivedBlocks = validateMessageData(message.data);
+                let receivedBlocks = JSON.parse(message.data);
                 handleBlockchainResponse(receivedBlocks);
                 break;
         }
@@ -116,7 +116,7 @@ let handleBlockchainResponse = function (receivedBlocks) {
     if (latestBlockReceived.index > latestBlockHeld.index) {
 
         console.log('blockchain possibly behind. We got: ' + latestBlockHeld.index + ' Peer got: ' + latestBlockReceived.index);
-        
+
         if (latestBlockHeld.hash === latestBlockReceived.previousHash) {
             if (addBlockToChain(latestBlockReceived)) {
                 broadcast(responseLatestMsg());
