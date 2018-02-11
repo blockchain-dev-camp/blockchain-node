@@ -55,32 +55,42 @@ let init = function (port, localNode) {
         //localNode.clearTransactions()
         // res.send(newBlock);
     });
+
     app.get('/mineBlock/:address', function (req, res) {
         let address = req.params.address;
-        let out = localNode.mineAddress(address)
+        let miningJob = localNode.mineAddress(address);
+        if (!miningJob) {
+            res.status(404).send('No mining job found.');
+        } else {    
+            //Answer for easy testing
+            // let minerData = localNode.blockChain.mine(miningJob.blockDataHash, miningJob.difficulty)
+            // let mineAnswer = {
+            //     nounce: minerData.nounce,
+            //     dateCreated: minerData.nextTimestamp,
+            //     blockHash: minerData.nextBlockHash
+            // }        
 
-        //Answer for easy testing
-        let minerData = localNode.blockChain.mine(out.blockDataHash, out.difficulty)
-        let mineAnswer = {
-            nounce: minerData.nounce,
-            dateCreated: minerData.nextTimestamp,
-            blockHash: minerData.nextBlockHash
+            // res.send([miningJob, mineAnswer]);
+
+            res.send([miningJob]);
         }
-        res.send([out, mineAnswer]);
     });
 
     app.post('/mining/submit-block/:address', (req, res) => {
         let address = req.params.address;
         let nounce = req.body.nounce;
-        let dateCreated = req.body.dateCreated
-        let blockHash = req.body.blockHash
-        let result = localNode.checkMiningJob(address, nounce, dateCreated, blockHash)
-        if (result) {
+        let dateCreated = req.body.dateCreated;
+        let blockHash = req.body.blockHash;
+        let result = localNode.checkMiningJob(address, nounce, dateCreated, blockHash);
+        if (!result) {
+            res.status(404).send('No Job for this address.');
+        } else {
             let out = {
                 nonce: nounce,
                 dateCreated: new Date(dateCreated),
                 blockHash: blockHash
-            }
+            };
+
             let block = new Block(result.index, blockHash, result.prevBlockHash, dateCreated, result.difficulty, nounce, result.transactions, address)
             localNode.addBlockToChain(block)
             res.send([out, localNode.balances])

@@ -52,10 +52,14 @@ class Node {
     }
 
     mineAddress(address) {
-        let index = this.blockChain.blocks.length
-        let transactionsIncluded = this.PendingTransactions.length + 1
-        let difficulty = this.Difficulty
-        let miningJob = this.getMiningJob(index, address, difficulty)
+        if (!this.PendingTransactions.length) {
+            return false;
+        }
+
+        let index = this.blockChain.blocks.length;
+        let transactionsIncluded = this.PendingTransactions.length;
+        let difficulty = this.Difficulty;
+        let miningJob = this.getMiningJob(index, address, difficulty);
         return {
             index: miningJob.index,
             transactionsIncluded: transactionsIncluded,
@@ -92,25 +96,29 @@ class Node {
 
     checkMiningJob(address, nounce, dateCreated, blockHash) {
         let miningJob = this.MiningJobs.get(address)
-        if (!miningJob) throw new Error("No Job for this address")
+        if (!miningJob) {
+            return false;
+        }
+
         let hashForMiner = crypto.calculateSHA256(
             miningJob.prevBlockHash,
             miningJob.index,
             miningJob.difficulty,
             miningJob.transactionsHash,
             miningJob.address
-        )
+        );
 
         let wholeHash = crypto.calculateSHA256(
             hashForMiner,
             dateCreated,
-            nounce)
-        if (!wholeHash === blockHash) {
-            return false
-        }
-        this.MiningJobs.clear()
+            nounce);
 
-        return miningJob
+        if (!wholeHash === blockHash) {
+            return false;
+        }
+
+        this.MiningJobs.clear();
+        return miningJob;
     }
 
     balanceUpdate() {
