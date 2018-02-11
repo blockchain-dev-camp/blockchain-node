@@ -1,22 +1,18 @@
-const Node = require('./Models/Node')
-const BC = require('./Models/Blockchain')
-const Block = require('./Models/Block')
-const Transaction = require('./Models/Transaction')
-const Crypto = require('./Models/Crypto')
+const Node = require('./Models/Node');
+const BC = require('./Models/Blockchain');
+const Block = require('./Models/Block');
+const Transaction = require('./Models/Transaction');
+const Crypto = require('./Models/Crypto');
 
-//const getBlockchain = BC.getBlockchain
-//const generateNextBlock = BC.generateNextBlock
-const P2P = require('./P2PServer')
-const getSockets = P2P.getSockets
-const connectToPeers = P2P.connectToPeers
-
+const P2P = require('./P2PServer');
+const getSockets = P2P.getSockets;
+const connectToPeers = P2P.connectToPeers;
 
 let init = function (port, localNode) {
 
-    let bodyParser = require('body-parser')
-    let app = require('express')()
-    app.use(bodyParser.json())
-
+    let bodyParser = require('body-parser');
+    let app = require('express')();
+    app.use(bodyParser.json());
 
     app.get('/blocks', function (req, res) {
         res.send(localNode.blockChain.getBlockchain());
@@ -121,11 +117,13 @@ let init = function (port, localNode) {
             res.send();
         }
     });
+
     app.get('/transactions', function (req, res) {
         res.send(
             localNode.getTransactions()
         )
     });
+
     app.post('/transactions/sign', function (req, res) {
         let from = req.body.fromAddress
         let to = req.body.toAddress
@@ -136,11 +134,13 @@ let init = function (port, localNode) {
             tr
         )
     });
+
     app.get('/key', function (req, res) {
         res.send(
             Crypto.generateKeys()
         )
     });
+
     app.post('/transactions/new', function (req, res) {
         let transaction = new Transaction(
             req.body.fromAddress,
@@ -159,6 +159,7 @@ let init = function (port, localNode) {
             }
         )
     });
+
     app.get('/transaction/:transactionId/info', (req, res) => {
         let transactionId = req.params.transactionId;
         let transactions = localNode.getTransactions()
@@ -181,12 +182,12 @@ let init = function (port, localNode) {
             }
         )
     });
+
     app.get('/balance', (req, res) => {
         res.send(localNode.getBalance())
     })
+
     app.get('/info', (req, res) => {
-
-
         let out = {
             about: "SoftUniChain/0.0009-nodeJs",
             nodeName: localNode.address,
