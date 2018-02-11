@@ -153,8 +153,8 @@ class Node {
         }
     }
 
-    getBalance(address) {
-        return this.balances
+    getBalances() {
+        return this.balances;
     }
 
     addBlockToChain(block) {

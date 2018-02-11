@@ -183,9 +183,19 @@ let init = function (port, localNode) {
         )
     });
 
-    app.get('/balance', (req, res) => {
-        res.send(localNode.getBalance())
+    app.get('/balance/:address', (req, res) => {
+        let balances = localNode.getBalances();
+        let address = req.params.address;
+        if (address in balances) {
+            res.send(balances[address].toString());
+        } else {
+            res.status(404).send();
+        }       
     })
+
+    app.get('/balance', (req, res) => {
+        res.send(localNode.getBalances());
+    });    
 
     app.get('/info', (req, res) => {
         let out = {
@@ -197,12 +207,13 @@ let init = function (port, localNode) {
             pendingTransactions: localNode.PendingTransactions.length,
             addresses: localNode.address,
             coins: localNode.balances[localNode.godAddress]
-        }
-        res.send(out)
+        };
+        
+        res.send(out);
     });
 
     app.listen(port, function () {
-        console.log(`Http server started at port ${port}`)
+        console.log(`Http server started at port ${port}`);
     });
 }
 
