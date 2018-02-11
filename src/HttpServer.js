@@ -62,6 +62,9 @@ let init = function (port, localNode) {
             localNode.addBlockToChain(block)
             res.send([block, localNode.balances])
         }
+        else {
+            res.send(["error", "invalid share"])
+        }
 
         // let newBlock = localNode.blockChain.generateNextBlock(localNode);
         // localNode.addBlockToChain(newBlock)
